@@ -56,7 +56,7 @@ You can also FORCE reseting the dialog lister using the "ClearDialogListitems" f
 #define DIALOG_MAX_LISTITEM_SIZE 	256 //The cell size of one listitem, Don't change this!
 #define DIALOG_MAX_INFO_SIZE 		4096 //The cell size of the whole dialog, Don't change this!
 #define DIALOG_STRING_PUFFER_SIZE	132 //The margin for the dialog len size so it won't cut off the string and bug everything, Don't change this!
-#define INVALID_LISTITEM 			-0x2 //The definition for an Invalid Listitem, don't change this if you don't have to, don't go above -1
+#define INVALID_LISTITEM 			(0xFFFF) //The definition for an Invalid Listitem, don't change this if you don't have to, don't go above -1
 #define NDP_AUTO					(MAX_DIALOG_ITEMS) //Be so kind and don't change this :D
 
 //Enumerators
