@@ -45,11 +45,6 @@ You can also FORCE reseting the dialog lister using the "ClearDialogListitems" f
 !!!!! Please don't change the authors name! Every script is a rarity! So please be so kind and DON'T remove this license! !!!!!
 **********************************************************************************************************************************/
 
-#define YSI_NO_OPTIMISATION_MESSAGE
-#define YSI_NO_VERSION_CHECK
-#define YSI_NO_CACHE_MESSAGE
-#define YSI_NO_MODE_CACHE
-
 #include <YSI_Coding\y_hooks> //By Y_Less | Thank you, great include <3
 
 //Defines
