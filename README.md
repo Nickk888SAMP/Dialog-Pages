@@ -1,4 +1,6 @@
 # Nickk's Dialog - Pages
+![Preview1](/preview1.png)
+
 NDialog-Pages is basically an addon that adds 3 additional options to the "`ShowPlayerDialog`" function.
 It will add a feature so that you can split the dialog list into multiple pages!
 
