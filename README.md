@@ -26,14 +26,22 @@ Include in your code and begin using the library:
 ```
 
 ## Functions
-* `AddDialogListitem(playerid, const itemstring[]);`:
-  * Adds an item to the dialog.
-* `AddDialogListitem(playerid, const itemstring[], va_args<>);`:
-  * Adds an item to the dialog with arguments (requires y_va include to work), not necessary to format string.
-* `ClearDialogListitems(playerid);`:
-  * Resets the lister for the dialog.
-* `ShowPlayerDialog(playerid, dialogid, style, caption[], #, button1[], button2[], items_per_page = 0, nextbutton[] = "{FF0000}>>>", backbutton[] = "{FF0000}<<<");`:
-  * Shows the dialog.
+Adds an item to the dialog.
+```pawn
+AddDialogListitem(playerid, const itemstring[]);
+```
+Adds an item to the dialog with arguments (requires y_va include to work), not necessary to format string.
+```pawn
+AddDialogListitem(playerid, const itemstring[], va_args<>);
+```
+Resets the lister for the dialog.
+```pawn
+ClearDialogListitems(playerid);
+```
+Shows the dialog.
+```pawn
+ShowPlayerDialog(playerid, dialogid, style, caption[], #, button1[], button2[], items_per_page = 0, nextbutton[] = "{FF0000}>>>", backbutton[] = "{FF0000}<<<");
+```
 
 ## How to Use
 Before showing the dialog for the player, you need to add the items into the dialog using the "`AddDialogListitem`" function without "`\n`"!
@@ -52,7 +60,7 @@ You can change the amount of max items in your dialog by redefining the "`MAX_DI
 
 ## Example
 * DIALOG_STYLE_LIST
-```bash
+```pawn
 new ndp_e_str[128];
 for(new i; i < MAX_DIALOG_ITEMS; i++)
 {
@@ -62,7 +70,7 @@ for(new i; i < MAX_DIALOG_ITEMS; i++)
 ShowPlayerDialog(playerid, 586, DIALOG_STYLE_LIST, "{FFFFFF}Test Dialog ID {FF00FF}586", #, "Button 1", "Button 2", 15);
 ```
 * DIALOG_STYLE_TABLIST
-```bash
+```pawn
 new ndp_e_str[128];
 for(new i; i < MAX_DIALOG_ITEMS; i++)
 {
@@ -71,7 +79,7 @@ for(new i; i < MAX_DIALOG_ITEMS; i++)
 ShowPlayerDialog(playerid, 586, DIALOG_STYLE_TABLIST, "{FFFFFF}Test Dialog ID {FF00FF}586", #, "Button 1", "Button 2", 27);
 ```
 * DIALOG_STYLE_TABLIST_HEADERS
-```bash
+```pawn
 new ndp_e_str[128];
 AddDialogListitem(playerid, "{FFFFFF}Column 1\t{FF00FF}Column 2\t{FFFF00}Column 3\t{00FFFF}Column 4");
 for(new i; i < MAX_DIALOG_ITEMS; i++)
