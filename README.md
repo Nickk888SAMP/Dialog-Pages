@@ -11,7 +11,21 @@ make some calculation yourself, everything is automatic and it will return the c
 
 It is VERY easy to use, because everything is fully automatic.
 
-### Functions
+## Installation
+
+Simply install to your project:
+
+```bash
+sampctl package install Nickk888SAMP/Dialog-Pages
+```
+
+Include in your code and begin using the library:
+
+```pawn
+#include <ndialog-pages>
+```
+
+## Functions
 * `AddDialogListitem(playerid, const itemstring[]);`:
   * Adds an item to the dialog.
 * `ClearDialogListitems(playerid);`:
@@ -19,11 +33,7 @@ It is VERY easy to use, because everything is fully automatic.
 * `ShowPlayerDialog(playerid, dialogid, style, caption[], #, button1[], button2[], items_per_page = 0, nextbutton[] = "{FF0000}>>>", backbutton[] = "{FF0000}<<<");`:
   * Shows the dialog.
 
-### How to Use
-On top of your script put this:
-```pawn
-#include <ndialog-pages>
-```
+## How to Use
 Before showing the dialog for the player, you need to add the items into the dialog using the "`AddDialogListitem`" function without "`\n`"!
 After you added all the items (Using a loop or manually) you need to use the "`ShowPlayerDialog`" function.
 The "`info[]`" parameter will not be used so you can just put an empty string or a "`#`" inside it.
