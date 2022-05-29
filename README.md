@@ -28,6 +28,8 @@ Include in your code and begin using the library:
 ## Functions
 * `AddDialogListitem(playerid, const itemstring[]);`:
   * Adds an item to the dialog.
+* `AddDialogListitem(playerid, const itemstring[], va_args<>);`:
+  * Adds an item to the dialog with arguments (requires y_va include to work), not necessary to format string.
 * `ClearDialogListitems(playerid);`:
   * Resets the lister for the dialog.
 * `ShowPlayerDialog(playerid, dialogid, style, caption[], #, button1[], button2[], items_per_page = 0, nextbutton[] = "{FF0000}>>>", backbutton[] = "{FF0000}<<<");`:
@@ -47,3 +49,6 @@ After the dialog has been showed to the player, using the "`AddDialogListitem`" 
 You can also FORCE reseting the dialog lister using the "`ClearDialogListitems`" function if you need to.
 
 You can change the amount of max items in your dialog by redefining the "`MAX_DIALOG_ITEMS`" definition.
+
+## Example
+
