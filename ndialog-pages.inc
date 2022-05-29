@@ -21,7 +21,7 @@ ShowPlayerDialog(playerid, dialogid, style, caption[], #, button1[], button2[], 
 
 #tryinclude 							<YSI_Coding\y_hooks> //By Y_Less | Thank you, great include <3
 #tryinclude 							<YSI_Coding\y_va> //By Y_Less | Thank you, great include <3
-#include 								<logger> //Uncomment to include logger, useful for debugging.
+//#include 								<logger> //Uncomment to include logger, useful for debugging.
 
 /************************************************************
                         DEFINITIONS
