@@ -27,19 +27,26 @@ ShowPlayerDialog(playerid, dialogid, style, caption[], #, button1[], button2[], 
                         DEFINITIONS
 *************************************************************/
 
-#if !defined MAX_DIALOG_ITEMS
-	#define MAX_DIALOG_ITEMS 			500 //Max dialog items, you can change this if you want, you can also redefine it using #define MAX_DIALOG_ITEMS your_amount BEFORE you include this!
+// Disables or Enables automatic removal of "\n" inside list items. Disable this if you know you have no \n added to your listitem.
+#if !defined NDP_AUTO_REMOVE_NEW_LINE
+	#define NDP_AUTO_REMOVE_NEW_LINE	true						
+#endif
+
+// Max dialog items, you can change this if you want, you can also redefine it using #define MAX_DIALOG_ITEMS your_amount BEFORE you include this!
+#if !defined MAX_DIALOG_ITEMS										
+	#define MAX_DIALOG_ITEMS 			500 						
 #endif
 
 /************************************************************
                         INTERNALS
 *************************************************************/
 
-#define DIALOG_MAX_LISTITEM_SIZE 		256 					//The cell size of one listitem, Don't change this!
-#define DIALOG_MAX_INFO_SIZE 			4096 					//The cell size of the whole dialog, Don't change this!
-#define DIALOG_STRING_PUFFER_SIZE		132 					//The margin for the dialog len size so it won't cut off the string and bug everything, Don't change this!
-#define INVALID_LISTITEM 				(0xFFFF) 			//The definition for an Invalid Listitem, don't change this if you don't have to, don't go above -1
-#define NDP_AUTO						(MAX_DIALOG_ITEMS) 		//Be so kind and don't change this :D
+// Only change when you know what you are doing!
+#define DIALOG_MAX_LISTITEM_SIZE 		256 						// The cell size of one listitem
+#define DIALOG_MAX_INFO_SIZE 			4096 						// The cell size of the whole dialog
+#define DIALOG_STRING_PUFFER_SIZE		132 						// The margin for the dialog len size so it won't cut off the string and bug everything.
+#define INVALID_LISTITEM 				(0xFFFF) 				// The definition for an Invalid Listitem, don't go above -1
+#define NDP_AUTO						(MAX_DIALOG_ITEMS) 			// Defines the size of the automatic detection definition of list items amount per page.
 
 /************************************************************
                         ENUMERATORS
@@ -113,6 +120,7 @@ stock ClearDialogListitems(playerid)
 		#else
 			format(NDP_DialogInfo[playerid][index], DIALOG_MAX_LISTITEM_SIZE, itemstr);
 		#endif
+		#if NDP_AUTO_REMOVE_NEW_LINE == true
 		// Checks if there is any "\n" in the itemstring and deletes it because it won't be needed and it can cause problems...
 		new ntd_f;
 		for(;;)
@@ -122,6 +130,7 @@ stock ClearDialogListitems(playerid)
 				break;
 			strdel(NDP_DialogInfo[playerid][index], ntd_f, ntd_f + 2);
 		}
+		#endif
 		// Counts the items that has been added.
 		NDP_P[playerid][ndp_dialogitemscount]++;
 		// Logger for Debug purpose
@@ -166,10 +175,9 @@ stock NDP_ShowPlayerDialog(playerid, dialogid, style, const caption[], const inf
 		
 		// Show
 		NDP_P[playerid][ndp_dialogopened] = true;
-		NDP_ShowDialogPage(playerid, NDP_P[playerid][ndp_page]);
+		return NDP_ShowDialogPage(playerid, NDP_P[playerid][ndp_page]);
 	}
-	else ShowPlayerDialog(playerid, dialogid, style, caption, info, button1, button2); //Default
-	return 1;
+	return ShowPlayerDialog(playerid, dialogid, style, caption, info, button1, button2); //Default
 }
 
 //This is an internal function, look complicated huh? It kinda is :D
@@ -317,9 +325,7 @@ stock NDP_ShowDialogPage(playerid, ndppage)
 			Logger_S("function", "NDP_ShowDialogPage"),
 			Logger_I("showingdialogforplayer", playerid));
 		#endif
-
-		ShowPlayerDialog(playerid, NDP_P[playerid][ndp_dialogid], NDP_P[playerid][ndp_style], NDP_P[playerid][ndp_caption], NDP_DialogString, NDP_P[playerid][ndp_button1], NDP_P[playerid][ndp_button2]);
-		return 1;
+		return ShowPlayerDialog(playerid, NDP_P[playerid][ndp_dialogid], NDP_P[playerid][ndp_style], NDP_P[playerid][ndp_caption], NDP_DialogString, NDP_P[playerid][ndp_button1], NDP_P[playerid][ndp_button2]);
 	}
 	return 0;
 }
@@ -426,5 +432,3 @@ stock NDP_ShowDialogPage(playerid, ndppage)
     #define _ALS_ShowPlayerDialog
 #endif
 #define ShowPlayerDialog NDP_ShowPlayerDialog
-
-//

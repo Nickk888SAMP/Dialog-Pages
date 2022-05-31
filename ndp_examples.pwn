@@ -5,7 +5,8 @@
 #define YSI_NO_CACHE_MESSAGE
 #define YSI_NO_MODE_CACHE
 
-#define MAX_DIALOG_ITEMS 		1000
+#define MAX_DIALOG_ITEMS 		50
+#define NDP_AUTO_REMOVE_NEW_LINE false
 #include <ndialog-pages>
 
 new ndp_e_str[128];
@@ -68,5 +69,3 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	}
 	return 0;
 }
-
-
