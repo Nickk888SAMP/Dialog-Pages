@@ -21,7 +21,17 @@ ShowPlayerDialog(playerid, dialogid, style, caption[], #, button1[], button2[], 
 
 #tryinclude 							<YSI_Coding\y_hooks> //By Y_Less | Thank you, great include <3
 #tryinclude 							<YSI_Coding\y_va> //By Y_Less | Thank you, great include <3
-//#include 								<logger> //Uncomment to include logger, useful for debugging.
+#if defined NDP_USE_LOGGER	
+	#include 								<logger> //Uncomment to include logger, useful for debugging.
+#endif
+
+/************************************************************
+                        FORWARDS
+*************************************************************/
+
+forward _NDP_ShowPlayerDialog_(playerid, dialogid, style, const caption[], const info[], const button1[], const button2[], items_per_page = 0, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
+forward ShowPlayerDialogPages(playerid, const function[], style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
+forward OnDialogPagesPerformed(playerid, const dialog[], response, success);
 
 /************************************************************
                         DEFINITIONS
@@ -36,6 +46,8 @@ ShowPlayerDialog(playerid, dialogid, style, caption[], #, button1[], button2[], 
 #if !defined MAX_DIALOG_ITEMS										
 	#define MAX_DIALOG_ITEMS 			500 						
 #endif
+
+#define DialogPages:%0(%1) forward ndpD_%0(%1); public ndpD_%0(%1)
 
 /************************************************************
                         INTERNALS
@@ -52,6 +64,12 @@ ShowPlayerDialog(playerid, dialogid, style, caption[], #, button1[], button2[], 
                         ENUMERATORS
 *************************************************************/
 
+enum
+{
+	NDP_DIALOG_TYPE_DIALOG,
+	NDP_DIALOG_TYPE_LEGACY
+};
+
 enum ndialogpages_data
 {
 	bool:ndp_dialogopened,
@@ -67,15 +85,17 @@ enum ndialogpages_data
 	ndp_nextbutton[DIALOG_MAX_LISTITEM_SIZE],
 	ndp_backbutton[DIALOG_MAX_LISTITEM_SIZE],
 	ndp_style,
-	ndp_dialogid
+	ndp_dialogid,
+	ndp_type,
+	ndp_dialogName[32]
 };
-new NDP_P[MAX_PLAYERS][ndialogpages_data];
+static NDP_P[MAX_PLAYERS][ndialogpages_data];
 
 // This stores all the items for the dialog
-new NDP_DialogInfo[MAX_PLAYERS][MAX_DIALOG_ITEMS][DIALOG_MAX_LISTITEM_SIZE];
+static NDP_DialogInfo[MAX_PLAYERS][MAX_DIALOG_ITEMS][DIALOG_MAX_LISTITEM_SIZE];
 
 // This is used as a temporary item string.
-new NDP_DialogString[DIALOG_MAX_INFO_SIZE];
+static NDP_DialogString[DIALOG_MAX_INFO_SIZE];
 
 /************************************************************
                         FUNCTIONS
@@ -86,6 +106,12 @@ stock ClearDialogListitems(playerid)
 {
 	NDP_P[playerid][ndp_dialogopened] = false;
 	NDP_P[playerid][ndp_dialogitemscount] = 0;
+	NDP_P[playerid][ndp_caption] = 0;
+	NDP_P[playerid][ndp_button1] = 0;
+	NDP_P[playerid][ndp_button2] = 0;
+	NDP_P[playerid][ndp_nextbutton] = 0;
+	NDP_P[playerid][ndp_backbutton] = 0;
+	NDP_P[playerid][ndp_dialogName] = 0;
 	//Logger for Debug purpose
 	#if defined _logger_included
 	Logger_Log("ndialog-pages", 
@@ -102,11 +128,6 @@ stock ClearDialogListitems(playerid)
 	stock AddDialogListitem(playerid, const itemstr[])
 #endif
 {
-	#if defined _INC_y_va
-		new distr[145];
-		va_format(distr, sizeof (distr), itemstr, va_start<2>);
-	#endif
-
 	// Try's to reset the items if a dialog has been already opened.
 	if(NDP_P[playerid][ndp_dialogopened])
 		ClearDialogListitems(playerid);
@@ -116,6 +137,8 @@ stock ClearDialogListitems(playerid)
 	{
 		new index = NDP_P[playerid][ndp_dialogitemscount];
 		#if defined _INC_y_va
+			new distr[145];
+			va_format(distr, sizeof (distr), itemstr, va_start<2>);
 			format(NDP_DialogInfo[playerid][index], DIALOG_MAX_LISTITEM_SIZE, distr);
 		#else
 			format(NDP_DialogInfo[playerid][index], DIALOG_MAX_LISTITEM_SIZE, itemstr);
@@ -150,9 +173,23 @@ stock ClearDialogListitems(playerid)
                 	INTERNAL FUNCTIONS
 *************************************************************/
 
-forward NDP_ShowPlayerDialog(playerid, dialogid, style, const caption[], const info[], const button1[], const button2[], items_per_page = 0, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
-stock NDP_ShowPlayerDialog(playerid, dialogid, style, const caption[], const info[], const button1[], const button2[], items_per_page = 0, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<")
+NDP_DialogInvoke(playerid, type, const function[], dialogid, style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[], const backbutton[])
 {
+	#if defined _logger_included
+	Logger_Log("ndialog-pages",
+		Logger_S("function", "NDP_DialogInvoke Called."),
+		Logger_I("playerid", playerid),
+		Logger_I("type", type),
+		Logger_S("function", function),
+		Logger_I("dialogid", dialogid),
+		Logger_S("caption", caption),
+		Logger_S("button1", button1),
+		Logger_S("button2", button2),
+		Logger_I("items_per_page", items_per_page),
+		Logger_S("nextbutton", nextbutton),
+		Logger_S("backbutton", backbutton));
+	#endif
+	strpack(NDP_P[playerid][ndp_dialogName], function, 32 char);
 	NDP_P[playerid][ndp_isstylepage] = false;
 	if(items_per_page > 0)
 	{
@@ -163,6 +200,9 @@ stock NDP_ShowPlayerDialog(playerid, dialogid, style, const caption[], const inf
 		NDP_P[playerid][ndp_amountperpage] = items_per_page;
 		NDP_P[playerid][ndp_endindex] = 0;
 		NDP_P[playerid][ndp_isstylepage] = true;
+		NDP_P[playerid][ndp_type] = type;
+		
+		strpack(NDP_P[playerid][ndp_dialogName], function, 32 char);
 		
 		format(NDP_P[playerid][ndp_button1], 64, button1);
 		format(NDP_P[playerid][ndp_button2], 64, button2);
@@ -177,12 +217,28 @@ stock NDP_ShowPlayerDialog(playerid, dialogid, style, const caption[], const inf
 		NDP_P[playerid][ndp_dialogopened] = true;
 		return NDP_ShowDialogPage(playerid, NDP_P[playerid][ndp_page]);
 	}
-	return ShowPlayerDialog(playerid, dialogid, style, caption, info, button1, button2); //Default
+	ClearDialogListitems(playerid);
+	return 0;
+}
+
+stock ShowPlayerDialogPages(playerid, const function[], style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<")
+{
+	return NDP_DialogInvoke(playerid, NDP_DIALOG_TYPE_DIALOG, function, 32701, style, caption, button1, button2, items_per_page, nextbutton, backbutton);
+}
+
+_NDP_ShowPlayerDialog_(playerid, dialogid, style, const caption[], const info[], const button1[], const button2[], items_per_page = 0, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<")
+{
+	#pragma unused info
+	if(!NDP_DialogInvoke(playerid, NDP_DIALOG_TYPE_LEGACY, "ndp_null", dialogid, style, caption, button1, button2, items_per_page, nextbutton, backbutton))
+	{
+		return ShowPlayerDialog(playerid, dialogid, style, caption, info, button1, button2);
+	}
+	return 0;
 }
 
 //This is an internal function, look complicated huh? It kinda is :D
 //In a nutshell it calculates how many items will fit into ONE page using the LEN size of all the items and buttons etc.
-stock NDP_CalculateListitemsPerPage(playerid)
+NDP_CalculateListitemsPerPage(playerid)
 {
 	new ndp_len, ndp_pagelist, ndp_counter;
 	new npd_buttonslen = (strlen(NDP_P[playerid][ndp_nextbutton]) + strlen(NDP_P[playerid][ndp_backbutton]) + 4);
@@ -235,7 +291,7 @@ stock NDP_CalculateListitemsPerPage(playerid)
 }
 
 // Another internal function, this will generate the dialog page.
-stock NDP_ShowDialogPage(playerid, ndppage)
+static NDP_ShowDialogPage(playerid, ndppage)
 {
 	// Getting the Start and End Listitem Index of the current page
 	new startindex = (ndppage > 0) ? (NDP_P[playerid][ndp_endindex][ndppage - 1]) : (0);
@@ -389,8 +445,57 @@ stock NDP_ShowDialogPage(playerid, ndppage)
 					Logger_Log("ndialog-pages",
 						Logger_S("callback", "OnDialogResponse"),
 						Logger_S("button clicked", "item"),
-						Logger_I("listitem", listitem));
+						Logger_I("listitem", listitem),
+						Logger_I("ndp_type", NDP_P[playerid][ndp_type]),
+						Logger_S("ndp_dialogName", NDP_P[playerid][ndp_dialogName]));
 					#endif
+					// Normal Dialog Style
+					if(NDP_P[playerid][ndp_type] == NDP_DIALOG_TYPE_DIALOG && strlen(NDP_P[playerid][ndp_dialogName]))
+					{
+						dialogid = 32701;
+						static ndp_odpp_public = cellmax;
+						new ndp_d_str[40], ndp_d_dnu[32];
+
+						// Get the "OnDialogPagesPerformed" function ID when exists.
+						if (ndp_odpp_public == cellmax)
+						{
+							ndp_odpp_public = funcidx("OnDialogPagesPerformed");
+						}
+
+						// Sanitize inputs.
+						for (new i = 0, l = strlen(inputtext); i < l; i ++)
+						{
+							if (inputtext[i] == '%')
+							{
+								inputtext[i] = '#';
+							}
+						}
+
+						// Create the function string
+						strunpack(ndp_d_dnu, NDP_P[playerid][ndp_dialogName], 32);
+						strcat(ndp_d_str, "ndpD_");
+						strcat(ndp_d_str, ndp_d_dnu);
+
+						// Logger for debugging
+						#if defined _logger_included
+						Logger_Log("ndialog-pages",
+							Logger_S("callback", "OnDialogResponse - type: NDP_DIALOG_TYPE_DIALOG"),
+							Logger_I("funcidx(ndp_d_str)", funcidx(ndp_d_str)),
+							Logger_S("ndp_d_str", ndp_d_str),
+							Logger_S("ndp_dialogName", ndp_d_dnu));
+						#endif
+
+						if ((ndp_odpp_public == -1) || (CallLocalFunction("OnDialogPagesPerformed", "dsdd", playerid, ndp_d_str[5], response, funcidx(ndp_d_str) != -1)))
+						{
+							// Call the function
+							CallLocalFunction(ndp_d_str, "ddds", playerid, response, listitem, inputtext);
+							#if defined _logger_included
+							Logger_Log("ndialog-pages",
+								Logger_S("callback", "OnDialogResponse - CallLocalFunction"));
+							#endif
+						}
+						return 1;
+					}
 				}
 			}
 			else if(NDP_P[playerid][ndp_dialogitemscount] > 0)
@@ -406,7 +511,10 @@ stock NDP_ShowDialogPage(playerid, ndppage)
 				listitem = INVALID_LISTITEM;
 			}
 		}
-		else listitem = INVALID_LISTITEM;
+		else 
+		{
+			listitem = INVALID_LISTITEM;
+		}
 	}
 	return 0;
 }
@@ -431,4 +539,4 @@ stock NDP_ShowDialogPage(playerid, ndppage)
 #else
     #define _ALS_ShowPlayerDialog
 #endif
-#define ShowPlayerDialog NDP_ShowPlayerDialog
+#define ShowPlayerDialog _NDP_ShowPlayerDialog_

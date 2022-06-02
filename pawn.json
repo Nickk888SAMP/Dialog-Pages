@@ -7,8 +7,7 @@
 		"pawn-lang/samp-stdlib",
 		"https://github.com/Southclaws/zcmd",
 		"https://github.com/Southclaws/samp-logger:1.5.0",
-		"https://github.com/pawn-lang/YSI-Includes:v5.06.1932",
-		"Nickk888SAMP/easyDialog:3.0"
+		"https://github.com/pawn-lang/YSI-Includes:v5.06.1932"
 	],
 	"runtime": {
 		"version": "0.3.7",
