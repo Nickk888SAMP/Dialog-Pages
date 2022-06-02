@@ -31,7 +31,7 @@ ShowPlayerDialog(playerid, dialogid, style, caption[], #, button1[], button2[], 
 
 forward _NDP_ShowPlayerDialog_(playerid, dialogid, style, const caption[], const info[], const button1[], const button2[], items_per_page = 0, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
 forward ShowPlayerDialogPages(playerid, const function[], style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
-forward OnDialogPagesPerformed(playerid, const dialog[], response, success);
+forward OnDialogPagesPerformed(playerid, const dialog[], response, bool:success, bool:pagechange);
 
 /************************************************************
                         DEFINITIONS
@@ -169,6 +169,12 @@ stock ClearDialogListitems(playerid)
 	return 0;
 }
 
+/* Opens a Dialog with pages. Items added with the "AddDialogListitem" function. Ensure that the "items_per_page" variable is above 0! */
+stock ShowPlayerDialogPages(playerid, const function[], style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<")
+{
+	return NDP_DialogInvoke(playerid, NDP_DIALOG_TYPE_DIALOG, function, 32701, style, caption, button1, button2, items_per_page, nextbutton, backbutton);
+}
+
 /************************************************************
                 	INTERNAL FUNCTIONS
 *************************************************************/
@@ -221,11 +227,7 @@ NDP_DialogInvoke(playerid, type, const function[], dialogid, style, const captio
 	return 0;
 }
 
-stock ShowPlayerDialogPages(playerid, const function[], style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<")
-{
-	return NDP_DialogInvoke(playerid, NDP_DIALOG_TYPE_DIALOG, function, 32701, style, caption, button1, button2, items_per_page, nextbutton, backbutton);
-}
-
+/* Internal Function. Wrapper for ShowPlayerDialog adding custom parameters. ! DON'T USE IT ! */
 _NDP_ShowPlayerDialog_(playerid, dialogid, style, const caption[], const info[], const button1[], const button2[], items_per_page = 0, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<")
 {
 	#pragma unused info
@@ -236,8 +238,7 @@ _NDP_ShowPlayerDialog_(playerid, dialogid, style, const caption[], const info[],
 	return 0;
 }
 
-//This is an internal function, look complicated huh? It kinda is :D
-//In a nutshell it calculates how many items will fit into ONE page using the LEN size of all the items and buttons etc.
+/* Internal Function. Calculates the amount of items per page in the Dialog. ! DON'T USE IT ! */
 NDP_CalculateListitemsPerPage(playerid)
 {
 	new ndp_len, ndp_pagelist, ndp_counter;
@@ -290,7 +291,7 @@ NDP_CalculateListitemsPerPage(playerid)
 	return 1;
 }
 
-// Another internal function, this will generate the dialog page.
+/* Internal function, this will generate the dialog page. ! DON'T USE IT ! */
 static NDP_ShowDialogPage(playerid, ndppage)
 {
 	// Getting the Start and End Listitem Index of the current page
@@ -386,6 +387,60 @@ static NDP_ShowDialogPage(playerid, ndppage)
 	return 0;
 }
 
+/* Internal function. This function processes the response of the dialog. ! DON'T USE IT ! */
+NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext[], dialogtype, oldpage, newpage)
+{
+	new bool:pageChange = bool:(newpage != oldpage);
+	
+	// This function is here in case there will be any new features in the future added.
+	switch(dialogtype)
+	{
+		case NDP_DIALOG_TYPE_DIALOG: // Normal Dialog
+		{
+			dialogid = 32701;
+			new ndp_d_str[40], ndp_d_dnu[32];
+
+			// Sanitize inputs.
+			for (new i = 0, l = strlen(inputtext); i < l; i ++)
+			{
+				if (inputtext[i] == '%')
+				{
+					inputtext[i] = '#';
+				}
+			}
+
+			// Create the function string
+			strunpack(ndp_d_dnu, NDP_P[playerid][ndp_dialogName], 32);
+			strcat(ndp_d_str, "ndpD_");
+			strcat(ndp_d_str, ndp_d_dnu);
+
+			// Logger for debugging
+			#if defined _logger_included
+			Logger_Log("ndialog-pages",
+				Logger_S("callback", "OnDialogResponse - type: NDP_DIALOG_TYPE_DIALOG"),
+				Logger_I("funcidx(ndp_d_str)", funcidx(ndp_d_str)),
+				Logger_S("ndp_d_str", ndp_d_str),
+				Logger_S("ndp_dialogName", ndp_d_dnu));
+			#endif
+
+			if ((funcidx("OnDialogPagesPerformed") == -1) || (CallLocalFunction("OnDialogPagesPerformed", "dsdbb", playerid, ndp_d_str[5], response, bool:(funcidx(ndp_d_str) != -1)), pageChange))
+			{
+				if(listitem != INVALID_LISTITEM)
+				{
+					// Call the function
+					CallLocalFunction(ndp_d_str, "ddds", playerid, response, listitem, inputtext);
+					#if defined _logger_included
+					Logger_Log("ndialog-pages",
+						Logger_S("callback", "OnDialogResponse - CallLocalFunction"));
+					#endif
+				}
+			}
+		}
+	}
+	return dialogid;
+}
+
+
 /************************************************************
 						CALLBACKS
 *************************************************************/
@@ -398,14 +453,14 @@ static NDP_ShowDialogPage(playerid, ndppage)
 {
 	if(dialogid == NDP_P[playerid][ndp_dialogid] && NDP_P[playerid][ndp_isstylepage] && NDP_P[playerid][ndp_dialogopened])
 	{
-		new page = NDP_P[playerid][ndp_page];
-		new startindex = (page > 0) ? (NDP_P[playerid][ndp_endindex][page - 1]) : (0);
+		new cur_page = NDP_P[playerid][ndp_page];
+		new startindex = (cur_page > 0) ? (NDP_P[playerid][ndp_endindex][cur_page - 1]) : (0);
 		new ndp_tmplistitem = startindex + listitem;
 		#if defined _logger_included
 		Logger_Log("ndialog-pages",
 			Logger_S("callback", "OnDialogResponse"),
 			Logger_I("ndp_dialogitemscount", NDP_P[playerid][ndp_dialogitemscount]),
-			Logger_I("page", page),
+			Logger_I("page", cur_page),
 			Logger_I("startindex", startindex),
 			Logger_I("ndp_tmplistitem", ndp_tmplistitem));
 		#endif
@@ -440,7 +495,7 @@ static NDP_ShowDialogPage(playerid, ndppage)
 				//Normal item
 				else 
 				{
-					listitem = ndp_tmplistitem - ((NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS && page > 0) ? (1) : (0)); 
+					listitem = ndp_tmplistitem - ((NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS && cur_page > 0) ? (1) : (0)); 
 					#if defined _logger_included
 					Logger_Log("ndialog-pages",
 						Logger_S("callback", "OnDialogResponse"),
@@ -449,53 +504,6 @@ static NDP_ShowDialogPage(playerid, ndppage)
 						Logger_I("ndp_type", NDP_P[playerid][ndp_type]),
 						Logger_S("ndp_dialogName", NDP_P[playerid][ndp_dialogName]));
 					#endif
-					// Normal Dialog Style
-					if(NDP_P[playerid][ndp_type] == NDP_DIALOG_TYPE_DIALOG && strlen(NDP_P[playerid][ndp_dialogName]))
-					{
-						dialogid = 32701;
-						static ndp_odpp_public = cellmax;
-						new ndp_d_str[40], ndp_d_dnu[32];
-
-						// Get the "OnDialogPagesPerformed" function ID when exists.
-						if (ndp_odpp_public == cellmax)
-						{
-							ndp_odpp_public = funcidx("OnDialogPagesPerformed");
-						}
-
-						// Sanitize inputs.
-						for (new i = 0, l = strlen(inputtext); i < l; i ++)
-						{
-							if (inputtext[i] == '%')
-							{
-								inputtext[i] = '#';
-							}
-						}
-
-						// Create the function string
-						strunpack(ndp_d_dnu, NDP_P[playerid][ndp_dialogName], 32);
-						strcat(ndp_d_str, "ndpD_");
-						strcat(ndp_d_str, ndp_d_dnu);
-
-						// Logger for debugging
-						#if defined _logger_included
-						Logger_Log("ndialog-pages",
-							Logger_S("callback", "OnDialogResponse - type: NDP_DIALOG_TYPE_DIALOG"),
-							Logger_I("funcidx(ndp_d_str)", funcidx(ndp_d_str)),
-							Logger_S("ndp_d_str", ndp_d_str),
-							Logger_S("ndp_dialogName", ndp_d_dnu));
-						#endif
-
-						if ((ndp_odpp_public == -1) || (CallLocalFunction("OnDialogPagesPerformed", "dsdd", playerid, ndp_d_str[5], response, funcidx(ndp_d_str) != -1)))
-						{
-							// Call the function
-							CallLocalFunction(ndp_d_str, "ddds", playerid, response, listitem, inputtext);
-							#if defined _logger_included
-							Logger_Log("ndialog-pages",
-								Logger_S("callback", "OnDialogResponse - CallLocalFunction"));
-							#endif
-						}
-						return 1;
-					}
 				}
 			}
 			else if(NDP_P[playerid][ndp_dialogitemscount] > 0)
@@ -515,6 +523,7 @@ static NDP_ShowDialogPage(playerid, ndppage)
 		{
 			listitem = INVALID_LISTITEM;
 		}
+		dialogid = NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext, NDP_P[playerid][ndp_type], cur_page, NDP_P[playerid][ndp_page]);
 	}
 	return 0;
 }

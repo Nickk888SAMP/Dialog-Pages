@@ -70,7 +70,7 @@ CMD:ndptest4(playerid, params[])
 			AddDialogListitem(playerid, ndp_e_str);
 		#endif
 	}
-	ShowPlayerDialogPages(playerid, "D_NDP_Test", DIALOG_STYLE_LIST, "{FFFFFF}Test Dialog ID {FF00FF}586 {FFFFFF}easyDialog", "Button 1", "Button 2", 15);
+	ShowPlayerDialogPages(playerid, "NDP_Test", DIALOG_STYLE_LIST, "{FFFFFF}Test Dialog ID {FF00FF}586 {FFFFFF}easyDialog", "Button 1", "Button 2", 15);
 	return 1;
 }
 
@@ -87,7 +87,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	return 0;
 }
 
-DialogPages:D_NDP_Test(playerid, response, listitem, inputtext[])
+DialogPages:NDP_Test(playerid, response, listitem, inputtext[])
 {
 	Logger_Log("D_NDP_Test Called.", 
 		Logger_I("playerid", playerid),
@@ -100,12 +100,13 @@ DialogPages:D_NDP_Test(playerid, response, listitem, inputtext[])
 	return 1;
 }
 
-public OnDialogPagesPerformed(playerid, const dialog[], response, success)
+public OnDialogPagesPerformed(playerid, const dialog[], response, bool:success, bool:pagechange)
 {
 	Logger_Log("OnDialogPagesPerformed Called.", 
 		Logger_I("playerid", playerid),
 		Logger_S("dialog", dialog),
 		Logger_I("response", response),
-		Logger_I("success", success));
+		Logger_B("success", success),
+		Logger_B("pagechange", pagechange));
 	return 1;
 }

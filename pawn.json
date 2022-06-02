@@ -2,7 +2,7 @@
 	"user": "Nickk888SAMP",
 	"repo": "Dialog-Pages",
 	"entry": "ndp_examples.pwn",
-	"output": "filterscripts/ndp_examples.amx",
+	"output": "ndp_examples.amx",
 	"dependencies": [
 		"pawn-lang/samp-stdlib",
 		"https://github.com/Southclaws/zcmd",
