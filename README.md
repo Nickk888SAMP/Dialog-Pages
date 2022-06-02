@@ -1,4 +1,4 @@
-# Nickk's Dialog - Pages
+# Nickk's Dialog Pages
 <img src="/preview.gif" width="400" height="400">
 
 NDialog-Pages is basically an addon that adds 3 additional options to the "`ShowPlayerDialog`" function.
