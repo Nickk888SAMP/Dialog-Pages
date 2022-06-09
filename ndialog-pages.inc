@@ -427,7 +427,7 @@ NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext[], d
 			if(listitem != INVALID_LISTITEM)
 			{
 				// Call the function
-				CallLocalFunction(ndp_d_str, "ddds", playerid, response, listitem, inputtext);
+				CallLocalFunction(ndp_d_str, "ddd", playerid, response, listitem);
 				#if defined _logger_included
 				Logger_Log("ndialog-pages",
 					Logger_S("callback", "OnDialogResponse - CallLocalFunction"));
