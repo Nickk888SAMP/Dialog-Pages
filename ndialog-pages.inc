@@ -391,6 +391,10 @@ static NDP_ShowDialogPage(playerid, ndppage)
 NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext[], dialogtype, oldpage, newpage)
 {
 	new bool:pageChange = bool:(newpage != oldpage);
+
+	#pragma unused oldpage
+	#pragma unused newpage
+	#pragma unused pageChange
 	
 	// This function is here in case there will be any new features in the future added.
 	switch(dialogtype)
@@ -419,21 +423,19 @@ NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext[], d
 			Logger_Log("ndialog-pages",
 				Logger_S("callback", "OnDialogResponse - type: NDP_DIALOG_TYPE_DIALOG"),
 				Logger_I("funcidx(ndp_d_str)", funcidx(ndp_d_str)),
+				Logger_I("listitem", listitem),
 				Logger_S("ndp_d_str", ndp_d_str),
 				Logger_S("ndp_dialogName", ndp_d_dnu));
 			#endif
 
-			if ((funcidx("OnDialogPagesPerformed") == -1) || (CallLocalFunction("OnDialogPagesPerformed", "dsdbb", playerid, ndp_d_str[5], response, bool:(funcidx(ndp_d_str) != -1)), pageChange))
+			if(listitem != INVALID_LISTITEM)
 			{
-				if(listitem != INVALID_LISTITEM)
-				{
-					// Call the function
-					CallLocalFunction(ndp_d_str, "ddds", playerid, response, listitem, inputtext);
-					#if defined _logger_included
-					Logger_Log("ndialog-pages",
-						Logger_S("callback", "OnDialogResponse - CallLocalFunction"));
-					#endif
-				}
+				// Call the function
+				CallLocalFunction(ndp_d_str, "ddds", playerid, response, listitem, inputtext);
+				#if defined _logger_included
+				Logger_Log("ndialog-pages",
+					Logger_S("callback", "OnDialogResponse - CallLocalFunction"));
+				#endif
 			}
 		}
 	}

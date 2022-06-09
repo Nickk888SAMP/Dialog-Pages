@@ -99,7 +99,7 @@ DialogPages:NDP_Test(playerid, response, listitem, inputtext[])
 	SendClientMessage(playerid, -1, ndp_e_str);
 	return 1;
 }
-
+/*
 public OnDialogPagesPerformed(playerid, const dialog[], response, bool:success, bool:pagechange)
 {
 	Logger_Log("OnDialogPagesPerformed Called.", 
@@ -109,4 +109,4 @@ public OnDialogPagesPerformed(playerid, const dialog[], response, bool:success, 
 		Logger_B("success", success),
 		Logger_B("pagechange", pagechange));
 	return 1;
-}
+}*/
