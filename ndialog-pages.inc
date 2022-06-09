@@ -2,16 +2,17 @@
 
 Script: NDialog-Pages
 Type: Include
-Version: 2.5
+Version: 3.0.0
 Author: Nickk888
-Date: 29.05.2022
+Date: 09.06.2022
 Repository: https://github.com/Nickk888SAMP/Dialog-Pages
 
 Natives:
 AddDialogListitem(playerid, const itemstring[]);
 AddDialogListitem(playerid, const itemstring[], va_args<>); // Only works when y_va is included
 ClearDialogListitems(playerid);
-ShowPlayerDialog(playerid, dialogid, style, caption[], #, button1[], button2[], items_per_page = 0, nextbutton[] = "{FF0000}>>>", backbutton[] = "{FF0000}<<<");
+ShowPlayerDialog(playerid, dialogid, style, const caption[], #, const button1[], const button2[], items_per_page = 0, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
+ShowPlayerDialogPages(playerid, const function[], style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
 
 **********************************************************************************************************************************/
 
@@ -388,13 +389,8 @@ static NDP_ShowDialogPage(playerid, ndppage)
 }
 
 /* Internal function. This function processes the response of the dialog. ! DON'T USE IT ! */
-NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext[], dialogtype, oldpage, newpage)
+NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext[], dialogtype)
 {
-	new bool:pageChange = bool:(newpage != oldpage);
-
-	#pragma unused oldpage
-	#pragma unused newpage
-	#pragma unused pageChange
 	
 	// This function is here in case there will be any new features in the future added.
 	switch(dialogtype)
@@ -525,7 +521,7 @@ NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext[], d
 		{
 			listitem = INVALID_LISTITEM;
 		}
-		dialogid = NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext, NDP_P[playerid][ndp_type], cur_page, NDP_P[playerid][ndp_page]);
+		dialogid = NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext, NDP_P[playerid][ndp_type]);
 	}
 	return 0;
 }

@@ -70,7 +70,7 @@ CMD:ndptest4(playerid, params[])
 			AddDialogListitem(playerid, ndp_e_str);
 		#endif
 	}
-	ShowPlayerDialogPages(playerid, "NDP_Test", DIALOG_STYLE_LIST, "{FFFFFF}Test Dialog ID {FF00FF}586 {FFFFFF}easyDialog", "Button 1", "Button 2", 15);
+	ShowPlayerDialogPages(playerid, "NDP_Test", DIALOG_STYLE_LIST, "{FFFFFF}Test Dialog ID {FF00FF}586 {FFFFFF}DialogPages Callback", "Button 1", "Button 2", 15);
 	return 1;
 }
 
@@ -89,24 +89,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 DialogPages:NDP_Test(playerid, response, listitem, inputtext[])
 {
-	Logger_Log("D_NDP_Test Called.", 
-		Logger_I("playerid", playerid),
-		Logger_I("response", response),
-		Logger_I("listitem", listitem),
-		Logger_S("inputtext", inputtext));
-
 	format(ndp_e_str, sizeof ndp_e_str, "{FFFF00}[NDialog-Pages] {FFFFFF}You have selected listitem ID: {FFFF00}%i", listitem);
 	SendClientMessage(playerid, -1, ndp_e_str);
 	return 1;
 }
-/*
-public OnDialogPagesPerformed(playerid, const dialog[], response, bool:success, bool:pagechange)
-{
-	Logger_Log("OnDialogPagesPerformed Called.", 
-		Logger_I("playerid", playerid),
-		Logger_S("dialog", dialog),
-		Logger_I("response", response),
-		Logger_B("success", success),
-		Logger_B("pagechange", pagechange));
-	return 1;
-}*/
