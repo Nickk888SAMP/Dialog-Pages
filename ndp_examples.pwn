@@ -87,9 +87,10 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	return 0;
 }
 
-DialogPages:NDP_Test(playerid, response, listitem, inputtext[])
+DialogPages:NDP_Test(playerid, response, listitem)
 {
-	format(ndp_e_str, sizeof ndp_e_str, "{FFFF00}[NDialog-Pages] {FFFFFF}You have selected listitem ID: {FFFF00}%i", listitem);
+	new dstr[128];
+	format(dstr, sizeof dstr, "{FFFF00}[NDialog-Pages] {FFFFFF}You have selected listitem ID: {FFFF00}%i", listitem);
 	SendClientMessage(playerid, -1, ndp_e_str);
 	return 1;
 }
