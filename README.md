@@ -1,15 +1,14 @@
 # Nickk's Dialog Pages
 <img src="/preview.gif" width="400" height="400">
 
-NDialog-Pages is basically an addon that adds 3 additional options to the "`ShowPlayerDialog`" function.
-It will add a feature so that you can split the dialog list into multiple pages!
+Dialog Pages adds the possibility to created paged dialog lists.
 
 It will basically calculate how many items will fit into one page and generate the "`Next`" button
-if there are too many. It will also add a "`Back`" button if you go to the second page etc.
-It will calculate the "`listitem`" in such way, like a normal list would work, so you don't need to
-make some calculation yourself, everything is automatic and it will return the correct "`listitem`".
+if there are too many. It will also add a "Back" button if you go to the second page etc.
+It will calculate the "listitem" in such way, like a normal list would work, so you don't need to
+make some calculation yourself, everything is automatic and it will return the correct "listitem".
 
-It is VERY easy to use, because everything is fully automatic.
+It is very easy to use, because everything is fully automatic.
 
 ## Installation
 
