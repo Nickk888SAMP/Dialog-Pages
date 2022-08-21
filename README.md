@@ -60,7 +60,20 @@ To show the paged dialog, use function "```ShowPlayerDialogPages```".
 
 If you want to clear the ```Items Cache```, you can always use ```ClearDialogListitems(playerid)```, it's optional because it's always cleared when the first item has been added after a paged dialog has been showed to the player.
 
+## Example
 ```pawn
+CMD:ndptest(playerid) // Needs ZCMD
+{
+	new string[128];
+	for(new i; i < 250; i++)
+	{
+		format(string, sizeof string, "{FFFFFF}List Item {FF00FF}%i", i);
+		AddDialogListitem(playerid, string);
+	}
+	ShowPlayerDialogPages(playerid, "DialogName", DIALOG_STYLE_LIST, "{FFFFFF}Test Dialog Name {FF00FF}DialogName", "Button 1", "Button 2", 15);
+	return 1;
+}
+
 DialogPages:DialogName(playerid, response, listitem)
 {
 	new dstr[128];
@@ -70,5 +83,4 @@ DialogPages:DialogName(playerid, response, listitem)
 }
 ```
 
-## Example
 [Example Script](https://github.com/Nickk888SAMP/Dialog-Pages/blob/master/ndp_examples.pwn)
