@@ -2,16 +2,15 @@
 
 Script: NDialog-Pages
 Type: Include
-Version: 3.0.0
+Version: 3.1.0
 Author: Nickk888
-Date: 09.06.2022
+Date: 21.08.2022
 Repository: https://github.com/Nickk888SAMP/Dialog-Pages
 
 Natives:
 AddDialogListitem(playerid, const itemstring[]);
 AddDialogListitem(playerid, const itemstring[], va_args<>); // Only works when y_va is included
 ClearDialogListitems(playerid);
-ShowPlayerDialog(playerid, dialogid, style, const caption[], #, const button1[], const button2[], items_per_page = 0, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
 ShowPlayerDialogPages(playerid, const function[], style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
 
 **********************************************************************************************************************************/
@@ -20,8 +19,8 @@ ShowPlayerDialogPages(playerid, const function[], style, const caption[], const 
                         INCLUDES
 *************************************************************/
 
-#tryinclude 							<YSI_Coding\y_hooks> //By Y_Less | Thank you, great include <3
-#tryinclude 							<YSI_Coding\y_va> //By Y_Less | Thank you, great include <3
+#tryinclude 								<YSI_Coding\y_hooks> //By Y_Less | Thank you, great include <3
+#tryinclude 								<YSI_Coding\y_va> //By Y_Less | Thank you, great include <3
 #if defined NDP_USE_LOGGER	
 	#include 								<logger> //Uncomment to include logger, useful for debugging.
 #endif
@@ -30,7 +29,6 @@ ShowPlayerDialogPages(playerid, const function[], style, const caption[], const 
                         FORWARDS
 *************************************************************/
 
-forward _NDP_ShowPlayerDialog_(playerid, dialogid, style, const caption[], const info[], const button1[], const button2[], items_per_page = 0, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
 forward ShowPlayerDialogPages(playerid, const function[], style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
 forward OnDialogPagesPerformed(playerid, const dialog[], response, bool:success, bool:pagechange);
 
@@ -225,17 +223,6 @@ NDP_DialogInvoke(playerid, type, const function[], dialogid, style, const captio
 		return NDP_ShowDialogPage(playerid, NDP_P[playerid][ndp_page]);
 	}
 	ClearDialogListitems(playerid);
-	return 0;
-}
-
-/* Internal Function. Wrapper for ShowPlayerDialog adding custom parameters. ! DON'T USE IT ! */
-_NDP_ShowPlayerDialog_(playerid, dialogid, style, const caption[], const info[], const button1[], const button2[], items_per_page = 0, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<")
-{
-	#pragma unused info
-	if(!NDP_DialogInvoke(playerid, NDP_DIALOG_TYPE_LEGACY, "ndp_null", dialogid, style, caption, button1, button2, items_per_page, nextbutton, backbutton))
-	{
-		return ShowPlayerDialog(playerid, dialogid, style, caption, info, button1, button2);
-	}
 	return 0;
 }
 
@@ -539,11 +526,3 @@ NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext[], d
 
 	#define OnDialogResponse NDP_OnDialogResponse
 #endif
-
-// ALS Hooking
-#if defined _ALS_ShowPlayerDialog
-    #undef ShowPlayerDialog
-#else
-    #define _ALS_ShowPlayerDialog
-#endif
-#define ShowPlayerDialog _NDP_ShowPlayerDialog_

@@ -1,11 +1,13 @@
 {
 	"user": "Nickk888SAMP",
 	"repo": "Dialog-Pages",
+	"tag": "3.0.0",
 	"entry": "ndp_examples.pwn",
 	"output": "ndp_examples.amx",
 	"dependencies": [
 		"pawn-lang/samp-stdlib",
-		"https://github.com/pawn-lang/YSI-Includes:v5.06.1932"
+		"https://github.com/pawn-lang/YSI-Includes:v5.06.1932",
+		"Southclaws/zcmd"
 	],
 	"runtime": {
 		"version": "0.3.7",
