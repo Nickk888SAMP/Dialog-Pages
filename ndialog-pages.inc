@@ -65,8 +65,7 @@ forward OnDialogPagesPerformed(playerid, const dialog[], response, bool:success,
 
 enum
 {
-	NDP_DIALOG_TYPE_DIALOG,
-	NDP_DIALOG_TYPE_LEGACY
+	NDP_DIALOG_TYPE_DIALOG
 };
 
 enum ndialogpages_data
@@ -378,7 +377,6 @@ static NDP_ShowDialogPage(playerid, ndppage)
 /* Internal function. This function processes the response of the dialog. ! DON'T USE IT ! */
 NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext[], dialogtype)
 {
-	
 	// This function is here in case there will be any new features in the future added.
 	switch(dialogtype)
 	{
