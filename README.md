@@ -70,7 +70,7 @@ DialogPages:DialogName(playerid, response, listitem)
 {
 	new dstr[128];
 	format(dstr, sizeof dstr, "{FFFF00}[NDialog-Pages] {FFFFFF}You have selected listitem ID: {FFFF00}%i", listitem);
-	SendClientMessage(playerid, -1, ndp_e_str);
+	SendClientMessage(playerid, -1, dstr);
 	return 1;
 }
 ```
