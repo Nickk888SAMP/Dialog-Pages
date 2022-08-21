@@ -42,11 +42,6 @@ Shows the dialog
 ShowPlayerDialogPages(playerid, const function[], style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
 ```
 
-Shows the dialog (Legacy, Deprecated)
-```pawn
-ShowPlayerDialog(playerid, dialogid, style, const caption[], #, const button1[], const button2[], items_per_page = 0, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<");
-```
-
 ## How to Use
 To add items to a paged dialog, use the function "```AddDialogListitem```".
 * ```playerid``` - The player you want to add items to the dialog.
