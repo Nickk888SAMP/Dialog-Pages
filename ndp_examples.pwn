@@ -59,22 +59,6 @@ CMD:ndptest3(playerid, params[]) // DIALOG_STYLE_TABLIST_HEADERS
 	return 1;
 }
 
-CMD:ndptest4(playerid, params[]) // DIALOG_STYLE_LIST
-{
-	ClearDialogListitems(playerid);
-	for(new i; i < MAX_DIALOG_ITEMS; i++)
-	{
-		#if defined _INC_y_va
-			AddDialogListitem(playerid, "{FFFFFF}List Item {FF00FF}%i\t{FFFFFF}List Item {FF00FF}%i\t{FFFFFF}List Item {FF00FF}%i\t{FFFFFF}List Item {FF00FF}%i", i, i, i, i);
-		#else
-			format(ndp_e_str, sizeof ndp_e_str, "{FFFFFF}List Item {FF00FF}%i\t{FFFFFF}List Item {FF00FF}%i\t{FFFFFF}List Item {FF00FF}%i\t{FFFFFF}List Item {FF00FF}%i", i, i, i, i);
-			AddDialogListitem(playerid, ndp_e_str);
-		#endif
-	}
-	ShowPlayerDialogPages(playerid, "NDP_Test", DIALOG_STYLE_LIST, "{FFFFFF}Test Dialog Name {FF00FF}NDP_Test", "Button 1", "Button 2", 15);
-	return 1;
-}
-
 /* Callback */
 
 DialogPages:NDP_Test(playerid, response, listitem)
