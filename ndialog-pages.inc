@@ -108,7 +108,7 @@ stock ClearDialogListitems(playerid)
 	NDP_P[playerid][ndp_button2] = 0;
 	NDP_P[playerid][ndp_nextButton] = 0;
 	NDP_P[playerid][ndp_backButton] = 0;
-	NDP_P[playerid][ndp_dialogName] = 0;
+	NDP_P[playerid][ndp_dialogName][0] = EOS;
 	//Logger for Debug purpose
 	#if defined _logger_included
 	Logger_Log("ndialog-pages", 
@@ -207,9 +207,14 @@ static stock NDP_DialogInvoke(playerid, type, const function[], dialogid, style,
 		NDP_P[playerid][ndp_amountPerPage] = items_per_page;
 		NDP_P[playerid][ndp_endIndex] = 0;
 		NDP_P[playerid][ndp_type] = type;
+		NDP_P[playerid][ndp_dialogName][0] = EOS;
 		
 		// Packs the function name into ndp_dialogName
-		strpack(NDP_P[playerid][ndp_dialogName], function, 32 char);
+		new bool: functionIsPacked = ispacked(function);
+		if (functionIsPacked)
+			strunpack(NDP_P[playerid][ndp_dialogName], function);
+		else
+			strcat(NDP_P[playerid][ndp_dialogName], function);
 		
 		// Saving all strings into the corresponding variables
 		format(NDP_P[playerid][ndp_button1], 64, button1);
@@ -387,7 +392,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 		case NDP_DIALOG_TYPE_DIALOG: // Normal Dialog
 		{
 			dialogid = 32701;
-			new ndp_d_str[40], ndp_d_dnu[32];
+			new ndp_d_str[32], ndp_d_dnu[32];
 
 			// Sanitize inputs.
 			for (new i = 0, l = strlen(inputtext); i < l; i ++)
@@ -399,7 +404,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 			}
 
 			// Create the function string
-			strunpack(ndp_d_dnu, NDP_P[playerid][ndp_dialogName], 32);
+			strcat(ndp_d_dnu, NDP_P[playerid][ndp_dialogName]);
 			strcat(ndp_d_str, "ndpD_");
 			strcat(ndp_d_str, ndp_d_dnu);
 
@@ -416,7 +421,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 			if(listitem != INVALID_LISTITEM)
 			{
 				// Call the function
-				CallLocalFunction(ndp_d_str, "ddd", playerid, response, listitem);
+				CallLocalFunction(ndp_d_str, "ddds", playerid, response, listitem, inputtext);
 				#if defined _logger_included
 				Logger_Log("ndialog-pages",
 					Logger_S("callback", "OnDialogResponse - CallLocalFunction"));
