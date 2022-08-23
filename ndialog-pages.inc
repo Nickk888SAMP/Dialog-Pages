@@ -68,26 +68,25 @@ static enum
 	NDP_DIALOG_TYPE_DIALOG
 };
 
-static enum ndialogpages_data
+static enum E_DIALOGPAGES_DATA
 {
-	bool:ndp_dialogopened,
-	bool:ndp_isstylepage,
-	ndp_dialogitemscount,
-	ndp_amountperpage,
-	ndp_endindex[MAX_DIALOG_ITEMS],
+	bool:ndp_dialogOpened,
+	ndp_dialogItemsCount,
+	ndp_amountPerPage,
+	ndp_endIndex[MAX_DIALOG_ITEMS],
 	ndp_itemsonpage,
 	ndp_page,
 	ndp_caption[64],
 	ndp_button1[64],
 	ndp_button2[64],
-	ndp_nextbutton[DIALOG_MAX_LISTITEM_SIZE],
-	ndp_backbutton[DIALOG_MAX_LISTITEM_SIZE],
+	ndp_nextButton[DIALOG_MAX_LISTITEM_SIZE],
+	ndp_backButton[DIALOG_MAX_LISTITEM_SIZE],
 	ndp_style,
 	ndp_dialogid,
 	ndp_type,
 	ndp_dialogName[32]
 };
-static NDP_P[MAX_PLAYERS][ndialogpages_data];
+static NDP_P[MAX_PLAYERS][E_DIALOGPAGES_DATA];
 
 // This stores all the items for the dialog
 static NDP_DialogInfo[MAX_PLAYERS][MAX_DIALOG_ITEMS][DIALOG_MAX_LISTITEM_SIZE];
@@ -102,13 +101,13 @@ static NDP_DialogString[DIALOG_MAX_INFO_SIZE];
 /* Clears the Dialog listitems cache */
 stock ClearDialogListitems(playerid)
 {
-	NDP_P[playerid][ndp_dialogopened] = false;
-	NDP_P[playerid][ndp_dialogitemscount] = 0;
+	NDP_P[playerid][ndp_dialogOpened] = false;
+	NDP_P[playerid][ndp_dialogItemsCount] = 0;
 	NDP_P[playerid][ndp_caption] = 0;
 	NDP_P[playerid][ndp_button1] = 0;
 	NDP_P[playerid][ndp_button2] = 0;
-	NDP_P[playerid][ndp_nextbutton] = 0;
-	NDP_P[playerid][ndp_backbutton] = 0;
+	NDP_P[playerid][ndp_nextButton] = 0;
+	NDP_P[playerid][ndp_backButton] = 0;
 	NDP_P[playerid][ndp_dialogName] = 0;
 	//Logger for Debug purpose
 	#if defined _logger_included
@@ -127,13 +126,13 @@ stock ClearDialogListitems(playerid)
 #endif
 {
 	// Try's to reset the items if a dialog has been already opened.
-	if(NDP_P[playerid][ndp_dialogopened])
+	if(NDP_P[playerid][ndp_dialogOpened])
 		ClearDialogListitems(playerid);
 	
 	// Checks if there is still room to add an item into memory.
-	if(NDP_P[playerid][ndp_dialogitemscount] < MAX_DIALOG_ITEMS)
+	if(NDP_P[playerid][ndp_dialogItemsCount] < MAX_DIALOG_ITEMS)
 	{
-		new index = NDP_P[playerid][ndp_dialogitemscount];
+		new index = NDP_P[playerid][ndp_dialogItemsCount];
 		#if defined _INC_y_va
 			new distr[145];
 			va_format(distr, sizeof (distr), itemstr, va_start<2>);
@@ -153,7 +152,7 @@ stock ClearDialogListitems(playerid)
 		}
 		#endif
 		// Counts the items that has been added.
-		NDP_P[playerid][ndp_dialogitemscount]++;
+		NDP_P[playerid][ndp_dialogItemsCount]++;
 		// Logger for Debug purpose
 		#if defined _logger_included
 		Logger_Log("ndialog-pages",
@@ -177,6 +176,7 @@ stock ShowPlayerDialogPages(playerid, const function[], style, const caption[], 
                 	INTERNAL FUNCTIONS
 *************************************************************/
 
+/* Prepares and Invokes/Opens the Dialog */
 static stock NDP_DialogInvoke(playerid, type, const function[], dialogid, style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[], const backbutton[])
 {
 	#if defined _logger_included
@@ -193,56 +193,60 @@ static stock NDP_DialogInvoke(playerid, type, const function[], dialogid, style,
 		Logger_S("nextbutton", nextbutton),
 		Logger_S("backbutton", backbutton));
 	#endif
-	strpack(NDP_P[playerid][ndp_dialogName], function, 32 char);
-	NDP_P[playerid][ndp_isstylepage] = false;
+
+	// Set ndp_dialogOpened to false in case if the dialog List couldn't be opened so it won't do anything after.
+	NDP_P[playerid][ndp_dialogOpened] = false;
+
+	// Checks if items_per_page is set above 0
 	if(items_per_page > 0)
 	{
 		// Saving all data into the enumerator
 		NDP_P[playerid][ndp_dialogid] = dialogid;
 		NDP_P[playerid][ndp_style] = style;
 		NDP_P[playerid][ndp_page] = 0;
-		NDP_P[playerid][ndp_amountperpage] = items_per_page;
-		NDP_P[playerid][ndp_endindex] = 0;
-		NDP_P[playerid][ndp_isstylepage] = true;
+		NDP_P[playerid][ndp_amountPerPage] = items_per_page;
+		NDP_P[playerid][ndp_endIndex] = 0;
 		NDP_P[playerid][ndp_type] = type;
 		
+		// Packs the function name into ndp_dialogName
 		strpack(NDP_P[playerid][ndp_dialogName], function, 32 char);
 		
+		// Saving all strings into the corresponding variables
 		format(NDP_P[playerid][ndp_button1], 64, button1);
 		format(NDP_P[playerid][ndp_button2], 64, button2);
 		format(NDP_P[playerid][ndp_caption], 64, caption);
-		format(NDP_P[playerid][ndp_nextbutton], DIALOG_MAX_LISTITEM_SIZE, nextbutton);
-		format(NDP_P[playerid][ndp_backbutton], DIALOG_MAX_LISTITEM_SIZE, backbutton);
+		format(NDP_P[playerid][ndp_nextButton], DIALOG_MAX_LISTITEM_SIZE, nextbutton);
+		format(NDP_P[playerid][ndp_backButton], DIALOG_MAX_LISTITEM_SIZE, backbutton);
 		
 		// Calculating the pages
 		NDP_CalculateListitemsPerPage(playerid);
 		
-		// Show
-		NDP_P[playerid][ndp_dialogopened] = true;
+		// Try to Show/Open the dialog
+		NDP_P[playerid][ndp_dialogOpened] = true;
 		return NDP_ShowDialogPage(playerid, NDP_P[playerid][ndp_page]);
 	}
 	ClearDialogListitems(playerid);
 	return 0;
 }
 
-/* Internal Function. Calculates the amount of items per page in the Dialog. ! DON'T USE IT ! */
+/* Calculates the amount of items per page in the Dialog.*/
 static stock NDP_CalculateListitemsPerPage(playerid)
 {
 	new ndp_len, ndp_pagelist, ndp_counter;
-	new npd_buttonslen = (strlen(NDP_P[playerid][ndp_nextbutton]) + strlen(NDP_P[playerid][ndp_backbutton]) + 4);
+	new npd_buttonslen = (strlen(NDP_P[playerid][ndp_nextButton]) + strlen(NDP_P[playerid][ndp_backButton]) + 4);
 
 	#if defined _logger_included
 	Logger_Log("ndialog-pages",
 		Logger_S("function", "NDP_CalculateListitemsPerPage Loop"),
-		Logger_I("ndp_amountperpage", NDP_P[playerid][ndp_amountperpage]),
-		Logger_I("ndp_dialogitemscount", NDP_P[playerid][ndp_dialogitemscount]),
+		Logger_I("ndp_amountPerPage", NDP_P[playerid][ndp_amountPerPage]),
+		Logger_I("ndp_dialogItemsCount", NDP_P[playerid][ndp_dialogItemsCount]),
 		Logger_I("npd_buttonslen", npd_buttonslen));
 	#endif
 
-	for(new i = (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS ? 1 : 0); i < NDP_P[playerid][ndp_dialogitemscount]; i++)
+	for(new i = (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS ? 1 : 0); i < NDP_P[playerid][ndp_dialogItemsCount]; i++)
 	{
-		ndp_len += (strlen(NDP_DialogInfo[playerid][(i < (NDP_P[playerid][ndp_dialogitemscount] - 1)) ? (i + 1) : (i)]) + 2);
-		if((ndp_counter >= NDP_P[playerid][ndp_amountperpage]) || ((ndp_len + npd_buttonslen) >= (DIALOG_MAX_INFO_SIZE - DIALOG_STRING_PUFFER_SIZE)))
+		ndp_len += (strlen(NDP_DialogInfo[playerid][(i < (NDP_P[playerid][ndp_dialogItemsCount] - 1)) ? (i + 1) : (i)]) + 2);
+		if((ndp_counter >= NDP_P[playerid][ndp_amountPerPage]) || ((ndp_len + npd_buttonslen) >= (DIALOG_MAX_INFO_SIZE - DIALOG_STRING_PUFFER_SIZE)))
 		{
 			#if defined _logger_included
 			Logger_Log("ndialog-pages",
@@ -258,22 +262,22 @@ static stock NDP_CalculateListitemsPerPage(playerid)
 			i--;
 		}
 		else ndp_counter++;
-		NDP_P[playerid][ndp_endindex][ndp_pagelist] = (i + 1);
+		NDP_P[playerid][ndp_endIndex][ndp_pagelist] = (i + 1);
 
 		#if defined _logger_included
 		Logger_Log("ndialog-pages",
 			Logger_S("function", "NDP_CalculateListitemsPerPage Loop"),
-			Logger_I("ndp_pagelist", NDP_P[playerid][ndp_endindex][ndp_pagelist]),
+			Logger_I("ndp_pagelist", NDP_P[playerid][ndp_endIndex][ndp_pagelist]),
 			Logger_I("iterator", i),
 			Logger_I("ndp_counter", ndp_counter));
 		#endif
 	}
-	NDP_P[playerid][ndp_endindex][ndp_pagelist + (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS ? 1 : 0)] = NDP_P[playerid][ndp_dialogitemscount];
+	NDP_P[playerid][ndp_endIndex][ndp_pagelist + (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS ? 1 : 0)] = NDP_P[playerid][ndp_dialogItemsCount];
 
 	#if defined _logger_included
 	Logger_Log("ndialog-pages",
 		Logger_S("function", "NDP_CalculateListitemsPerPage After Loop"),
-		Logger_I("ndp_pagelist", NDP_P[playerid][ndp_endindex][ndp_pagelist]));
+		Logger_I("ndp_pagelist", NDP_P[playerid][ndp_endIndex][ndp_pagelist]));
 	#endif
 	return 1;
 }
@@ -282,8 +286,8 @@ static stock NDP_CalculateListitemsPerPage(playerid)
 static stock NDP_ShowDialogPage(playerid, ndppage)
 {
 	// Getting the Start and End Listitem Index of the current page
-	new startindex = (ndppage > 0) ? (NDP_P[playerid][ndp_endindex][ndppage - 1]) : (0);
-	new endindex = NDP_P[playerid][ndp_endindex][ndppage];
+	new startindex = (ndppage > 0) ? (NDP_P[playerid][ndp_endIndex][ndppage - 1]) : (0);
+	new endindex = NDP_P[playerid][ndp_endIndex][ndppage];
 
 	#if defined _logger_included
 	Logger_Log("ndialog-pages",
@@ -338,10 +342,10 @@ static stock NDP_ShowDialogPage(playerid, ndppage)
 	#endif
 
 	// Generate Button "Next"
-	if(endindex != 0 && endindex < (NDP_P[playerid][ndp_dialogitemscount]))
+	if(endindex != 0 && endindex < (NDP_P[playerid][ndp_dialogItemsCount]))
 	{
 		strcat(NDP_DialogString, "\n");
-		strcat(NDP_DialogString, NDP_P[playerid][ndp_nextbutton]);
+		strcat(NDP_DialogString, NDP_P[playerid][ndp_nextButton]);
 
 		#if defined _logger_included
 		Logger_Log("ndialog-pages",
@@ -353,7 +357,7 @@ static stock NDP_ShowDialogPage(playerid, ndppage)
 	if(startindex != 0)
 	{
 		strcat(NDP_DialogString, "\n");
-		strcat(NDP_DialogString, NDP_P[playerid][ndp_backbutton]);
+		strcat(NDP_DialogString, NDP_P[playerid][ndp_backButton]);
 
 		#if defined _logger_included
 		Logger_Log("ndialog-pages",
@@ -434,22 +438,22 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 	public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 #endif
 {
-	if(dialogid == NDP_P[playerid][ndp_dialogid] && NDP_P[playerid][ndp_isstylepage] && NDP_P[playerid][ndp_dialogopened])
+	if(dialogid == NDP_P[playerid][ndp_dialogid] && NDP_P[playerid][ndp_dialogOpened])
 	{
 		new cur_page = NDP_P[playerid][ndp_page];
-		new startindex = (cur_page > 0) ? (NDP_P[playerid][ndp_endindex][cur_page - 1]) : (0);
+		new startindex = (cur_page > 0) ? (NDP_P[playerid][ndp_endIndex][cur_page - 1]) : (0);
 		new ndp_tmplistitem = startindex + listitem;
 		#if defined _logger_included
 		Logger_Log("ndialog-pages",
 			Logger_S("callback", "OnDialogResponse"),
-			Logger_I("ndp_dialogitemscount", NDP_P[playerid][ndp_dialogitemscount]),
+			Logger_I("ndp_dialogItemsCount", NDP_P[playerid][ndp_dialogItemsCount]),
 			Logger_I("page", cur_page),
 			Logger_I("startindex", startindex),
 			Logger_I("ndp_tmplistitem", ndp_tmplistitem));
 		#endif
-		if(NDP_P[playerid][ndp_dialogitemscount] > (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS ? 1 : 0))
+		if(NDP_P[playerid][ndp_dialogItemsCount] > (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS ? 1 : 0))
 		{
-			if(ndp_tmplistitem < NDP_P[playerid][ndp_dialogitemscount])
+			if(ndp_tmplistitem < NDP_P[playerid][ndp_dialogItemsCount])
 			{
 				//Button "Next"
 				if(listitem == (NDP_P[playerid][ndp_itemsonpage])) 
@@ -489,7 +493,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 					#endif
 				}
 			}
-			else if(NDP_P[playerid][ndp_dialogitemscount] > 0)
+			else if(NDP_P[playerid][ndp_dialogItemsCount] > 0)
 			{
 				//Also button "Back", but on the last page
 				#if defined _logger_included
