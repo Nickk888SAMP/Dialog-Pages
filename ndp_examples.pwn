@@ -61,12 +61,12 @@ CMD:ndptest3(playerid, params[]) // DIALOG_STYLE_TABLIST_HEADERS
 
 /* Callback */
 
-DialogPages:NDP_Test(playerid, response, listitem)
+DialogPages:NDP_Test(playerid, response, listitem, inputtext[])
 {
 	if(!response)
 		return 1;
 	
-	format(ndp_e_str, sizeof ndp_e_str, "[NDialog-Pages] You have selected listitem ID: %i", listitem);
+	format(ndp_e_str, sizeof ndp_e_str, "[NDialog-Pages] You have selected listitem ID: {666666}%i{FFFFFF}, listitem's text: {666666}%s", listitem, inputtext);
 	SendClientMessage(playerid, -1, ndp_e_str);
 	print(ndp_e_str);
 	return 1;
