@@ -1,0 +1,5 @@
+root = true
+
+[*.{pwn,inc,own}]
+indent_style = tab
+indent_size = 4

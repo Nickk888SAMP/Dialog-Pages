@@ -63,12 +63,12 @@ forward OnDialogPagesPerformed(playerid, const dialog[], response, bool:success,
                         ENUMERATORS
 *************************************************************/
 
-enum
+static enum
 {
 	NDP_DIALOG_TYPE_DIALOG
 };
 
-enum ndialogpages_data
+static enum ndialogpages_data
 {
 	bool:ndp_dialogopened,
 	bool:ndp_isstylepage,
@@ -177,7 +177,7 @@ stock ShowPlayerDialogPages(playerid, const function[], style, const caption[], 
                 	INTERNAL FUNCTIONS
 *************************************************************/
 
-NDP_DialogInvoke(playerid, type, const function[], dialogid, style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[], const backbutton[])
+static stock NDP_DialogInvoke(playerid, type, const function[], dialogid, style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[], const backbutton[])
 {
 	#if defined _logger_included
 	Logger_Log("ndialog-pages",
@@ -226,7 +226,7 @@ NDP_DialogInvoke(playerid, type, const function[], dialogid, style, const captio
 }
 
 /* Internal Function. Calculates the amount of items per page in the Dialog. ! DON'T USE IT ! */
-NDP_CalculateListitemsPerPage(playerid)
+static stock NDP_CalculateListitemsPerPage(playerid)
 {
 	new ndp_len, ndp_pagelist, ndp_counter;
 	new npd_buttonslen = (strlen(NDP_P[playerid][ndp_nextbutton]) + strlen(NDP_P[playerid][ndp_backbutton]) + 4);
@@ -279,7 +279,7 @@ NDP_CalculateListitemsPerPage(playerid)
 }
 
 /* Internal function, this will generate the dialog page. ! DON'T USE IT ! */
-static NDP_ShowDialogPage(playerid, ndppage)
+static stock NDP_ShowDialogPage(playerid, ndppage)
 {
 	// Getting the Start and End Listitem Index of the current page
 	new startindex = (ndppage > 0) ? (NDP_P[playerid][ndp_endindex][ndppage - 1]) : (0);
@@ -375,7 +375,7 @@ static NDP_ShowDialogPage(playerid, ndppage)
 }
 
 /* Internal function. This function processes the response of the dialog. ! DON'T USE IT ! */
-NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext[], dialogtype)
+static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, inputtext[], dialogtype)
 {
 	// This function is here in case there will be any new features in the future added.
 	switch(dialogtype)
