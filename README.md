@@ -5,7 +5,7 @@ Nickk's Dialog Pages adds the possibility to created paged dialog lists.
 
 It will basically calculate how many items will fit into one page and generate the `Next` button
 if there are too many. It will also add a `Back` button if you go to the second page etc.
-It will calculate the `listitem`"in such way, like a normal list would work, so you don't need to
+It will calculate the `listitem` in such way, like a normal list would work, so you don't need to
 make some calculation yourself, everything is automatic and it will return the correct `listitem`.
 
 It is very easy to use, because everything is fully automatic.
@@ -60,6 +60,12 @@ To show the paged dialog, use function "```ShowPlayerDialogPages```".
 
 If you want to clear the ```Items Cache```, you can always use ```ClearDialogListitems(playerid)```, it's optional because it's always cleared when the first item has been added after a paged dialog has been showed to the player.
 
+To get the response of the Dialog, create a new callback using "```DialogPages:Name_Of_The_Dialog(playerid, response, listitem, inputtext[])```".
+* ```playerid``` - The player who responded to the Dialog.
+* ```response``` - Did the player clicked Button1 or Button2.
+* ```listitem``` - The selected listitem of the dialog.
+* ```inputtext[]``` - The selected listitem's text as a string.
+
 ## Example
 ```pawn
 CMD:ndptest(playerid) // Needs ZCMD
@@ -70,14 +76,16 @@ CMD:ndptest(playerid) // Needs ZCMD
 		format(string, sizeof string, "{FFFFFF}List Item {FF00FF}%i", i);
 		AddDialogListitem(playerid, string);
 	}
-	ShowPlayerDialogPages(playerid, "DialogName", DIALOG_STYLE_LIST, "{FFFFFF}Test Dialog Name {FF00FF}DialogName", "Button 1", "Button 2", 15);
+	ShowPlayerDialogPages(playerid, "MyPagedDialog", DIALOG_STYLE_LIST, "{FFFFFF}Test Dialog Name {FF00FF}DialogName", "Button 1", "Button 2", 15);
 	return 1;
 }
 
-DialogPages:DialogName(playerid, response, listitem)
+DialogPages:MyPagedDialog(playerid, response, listitem, inputtext[])
 {
+	if(!response) return 1;
+		
 	new dstr[128];
-	format(dstr, sizeof dstr, "{FFFF00}[NDialog-Pages] {FFFFFF}You have selected listitem ID: {FFFF00}%i", listitem);
+	format(dstr, sizeof dstr, "[NDialog-Pages] You have selected listitem ID: {666666}%i{FFFFFF}, listitem's text: {666666}%s", listitem, inputtext);
 	SendClientMessage(playerid, -1, dstr);
 	return 1;
 }
