@@ -13,6 +13,7 @@
 	"entry": "ndp_examples.pwn",
 	"output": "ndp_examples.amx",
 	"dev_dependencies": [
-		"Southclaws/zcmd"
+		"Southclaws/zcmd",
+		"Southclaws/samp-logger@master"
 	]
 }

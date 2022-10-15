@@ -1,5 +1,5 @@
 #include <a_samp>
-#include <zcmd>
+
 #define YSI_NO_OPTIMISATION_MESSAGE
 #define YSI_NO_VERSION_CHECK
 #define YSI_NO_CACHE_MESSAGE
@@ -7,8 +7,10 @@
 
 #define MAX_DIALOG_ITEMS 		150
 #define NDP_AUTO_REMOVE_NEW_LINE false
-//#define NDP_USE_LOGGER
+
+#define NDP_USE_LOGGER
 #include <ndialog-pages>
+#include <zcmd>
 
 new ndp_e_str[128];
 
