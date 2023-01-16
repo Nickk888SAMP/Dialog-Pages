@@ -1,7 +1,7 @@
 # Nickk's Dialog Pages
 <img src="/preview.gif" width="400" height="400">
 
-Nickk's Dialog Pages adds the possibility to created paged dialog lists.
+Nickk's Dialog Pages adds the possibility to create paged dialog lists.
 
 It will basically calculate how many items will fit into one page and generate the `Next` button
 if there are too many. It will also add a `Back` button if you go to the second page etc.
