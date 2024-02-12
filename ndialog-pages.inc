@@ -165,9 +165,7 @@ stock ClearDialogListitems(playerid)
 	if(NDP_P[playerid][ndp_dialogItemsCount] < MAX_DIALOG_ITEMS)
 	{
 	#endif
-	#if defined _logger_included || !defined __VECTOR_INCLUDED__
-		new index = NDP_P[playerid][ndp_dialogItemsCount];
-	#endif
+	new index = NDP_P[playerid][ndp_dialogItemsCount];
 	#if defined _INC_y_va
 		new distr[145];
 		va_format(distr, sizeof (distr), itemstr, va_start<2>);
