@@ -4,7 +4,8 @@
 	"tag": "3.1.0",
 	"contributors": [
 		"Nickk888SAMP",
-		"ZantetsukenGT"
+		"ZantetsukenGT",
+		"wiger3"
 	],
 	"dependencies": [
 		"pawn-lang/samp-stdlib",

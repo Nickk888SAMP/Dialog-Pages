@@ -21,6 +21,7 @@ ShowPlayerDialogPages(playerid, const function[], style, const caption[], const 
 
 #tryinclude 								<YSI_Coding\y_hooks> //By Y_Less | Thank you, great include <3
 #tryinclude 								<YSI_Coding\y_va> //By Y_Less | Thank you, great include <3
+#tryinclude 								<vector> //By BigETI | Support added by wiger3
 #if defined NDP_USE_LOGGER	
 	#include 								<logger> //Uncomment to include logger, useful for debugging.
 #endif
@@ -42,8 +43,10 @@ forward OnDialogPagesPerformed(playerid, const dialog[], response, bool:success,
 #endif
 
 // Max dialog items, you can change this if you want, you can also redefine it using #define MAX_DIALOG_ITEMS your_amount BEFORE you include this!
-#if !defined MAX_DIALOG_ITEMS										
-	#define MAX_DIALOG_ITEMS 			500 						
+#if !defined __VECTOR_INCLUDED__
+	#if !defined MAX_DIALOG_ITEMS										
+		#define MAX_DIALOG_ITEMS 			500 						
+	#endif
 #endif
 
 #define DialogPages:%0(%1) forward ndpD_%0(%1); public ndpD_%0(%1)
@@ -57,7 +60,7 @@ forward OnDialogPagesPerformed(playerid, const dialog[], response, bool:success,
 #define DIALOG_MAX_INFO_SIZE 			4096 						// The cell size of the whole dialog
 #define DIALOG_STRING_PUFFER_SIZE		132 						// The margin for the dialog len size so it won't cut off the string and bug everything.
 #define INVALID_LISTITEM 				(0xFFFF) 				// The definition for an Invalid Listitem, don't go above -1
-#define NDP_AUTO						(MAX_DIALOG_ITEMS) 			// Defines the size of the automatic detection definition of list items amount per page.
+//#define NDP_AUTO						(MAX_DIALOG_ITEMS) 			// Defines the size of the automatic detection definition of list items amount per page.
 
 /************************************************************
                         ENUMERATORS
@@ -68,28 +71,53 @@ static enum
 	NDP_DIALOG_TYPE_DIALOG
 };
 
-static enum E_DIALOGPAGES_DATA
-{
-	bool:ndp_dialogOpened,
-	ndp_dialogItemsCount,
-	ndp_amountPerPage,
-	ndp_endIndex[MAX_DIALOG_ITEMS],
-	ndp_itemsonpage,
-	ndp_page,
-	ndp_caption[64],
-	ndp_button1[64],
-	ndp_button2[64],
-	ndp_nextButton[DIALOG_MAX_LISTITEM_SIZE],
-	ndp_backButton[DIALOG_MAX_LISTITEM_SIZE],
-	ndp_style,
-	ndp_dialogid,
-	ndp_type,
-	ndp_dialogName[32]
-};
+#if defined __VECTOR_INCLUDED__
+	static enum E_DIALOGPAGES_DATA
+	{
+		bool:ndp_dialogOpened,
+		ndp_dialogItemsCount,
+		ndp_amountPerPage,
+		Vector:ndp_endIndex,
+		ndp_itemsonpage,
+		ndp_page,
+		ndp_caption[64],
+		ndp_button1[64],
+		ndp_button2[64],
+		ndp_nextButton[DIALOG_MAX_LISTITEM_SIZE],
+		ndp_backButton[DIALOG_MAX_LISTITEM_SIZE],
+		ndp_style,
+		ndp_dialogid,
+		ndp_type,
+		ndp_dialogName[32]
+	};
+#else
+	static enum E_DIALOGPAGES_DATA
+	{
+		bool:ndp_dialogOpened,
+		ndp_dialogItemsCount,
+		ndp_amountPerPage,
+		ndp_endIndex[MAX_DIALOG_ITEMS],
+		ndp_itemsonpage,
+		ndp_page,
+		ndp_caption[64],
+		ndp_button1[64],
+		ndp_button2[64],
+		ndp_nextButton[DIALOG_MAX_LISTITEM_SIZE],
+		ndp_backButton[DIALOG_MAX_LISTITEM_SIZE],
+		ndp_style,
+		ndp_dialogid,
+		ndp_type,
+		ndp_dialogName[32]
+	};
+#endif
 static NDP_P[MAX_PLAYERS][E_DIALOGPAGES_DATA];
 
 // This stores all the items for the dialog
-static NDP_DialogInfo[MAX_PLAYERS][MAX_DIALOG_ITEMS][DIALOG_MAX_LISTITEM_SIZE];
+#if defined __VECTOR_INCLUDED__
+	static Vector:NDP_DialogInfo[MAX_PLAYERS];
+#else
+	static NDP_DialogInfo[MAX_PLAYERS][MAX_DIALOG_ITEMS][DIALOG_MAX_LISTITEM_SIZE];
+#endif
 
 // This is used as a temporary item string.
 static NDP_DialogString[DIALOG_MAX_INFO_SIZE];
@@ -109,6 +137,9 @@ stock ClearDialogListitems(playerid)
 	NDP_P[playerid][ndp_nextButton] = 0;
 	NDP_P[playerid][ndp_backButton] = 0;
 	NDP_P[playerid][ndp_dialogName][0] = EOS;
+	#if defined __VECTOR_INCLUDED__
+		VECTOR_clear(NDP_DialogInfo[playerid]);
+	#endif
 	//Logger for Debug purpose
 	#if defined _logger_included
 	Logger_Log("ndialog-pages", 
@@ -129,41 +160,78 @@ stock ClearDialogListitems(playerid)
 	if(NDP_P[playerid][ndp_dialogOpened])
 		ClearDialogListitems(playerid);
 	
+	#if !defined __VECTOR_INCLUDED__
 	// Checks if there is still room to add an item into memory.
 	if(NDP_P[playerid][ndp_dialogItemsCount] < MAX_DIALOG_ITEMS)
 	{
+	#endif
+	#if defined _logger_included || !defined __VECTOR_INCLUDED__
 		new index = NDP_P[playerid][ndp_dialogItemsCount];
-		#if defined _INC_y_va
-			new distr[145];
-			va_format(distr, sizeof (distr), itemstr, va_start<2>);
+	#endif
+	#if defined _INC_y_va
+		new distr[145];
+		va_format(distr, sizeof (distr), itemstr, va_start<2>);
+		#if defined __VECTOR_INCLUDED__
+			VECTOR_push_back_str(NDP_DialogInfo[playerid], distr);
+		#else
 			format(NDP_DialogInfo[playerid][index], DIALOG_MAX_LISTITEM_SIZE, distr);
+		#endif
+	#else
+		#if defined __VECTOR_INCLUDED__
+			VECTOR_push_back_str(NDP_DialogInfo[playerid], itemstr);
 		#else
 			format(NDP_DialogInfo[playerid][index], DIALOG_MAX_LISTITEM_SIZE, itemstr);
 		#endif
-		#if NDP_AUTO_REMOVE_NEW_LINE == true
+	#endif
+	#if NDP_AUTO_REMOVE_NEW_LINE == true
 		// Checks if there is any "\n" in the itemstring and deletes it because it won't be needed and it can cause problems...
 		new ntd_f;
-		for(;;)
-		{
-			ntd_f = strfind(NDP_DialogInfo[playerid][index], "\n", true);
-			if(ntd_f == -1)
-				break;
-			strdel(NDP_DialogInfo[playerid][index], ntd_f, ntd_f + 2);
-		}
+		#if defined __VECTOR_INCLUDED__
+			new ndp_data[DIALOG_MAX_LISTITEM_SIZE];
+			VECTOR_get_str(NDP_DialogInfo[playerid], index, ndp_data, DIALOG_MAX_LISTITEM_SIZE);
+			for(;;)
+			{
+				ntd_f = strfind(ndp_data, "\n", true);
+				if(ntd_f == -1)
+					break;
+				strdel(ndp_data, ntd_f, ntd_f + 2);
+			}
+			VECTOR_set_str(NDP_DialogInfo[playerid], index, ndp_data);
+		#else
+			for(;;)
+			{
+				ntd_f = strfind(NDP_DialogInfo[playerid][index], "\n", true);
+				if(ntd_f == -1)
+					break;
+				strdel(NDP_DialogInfo[playerid][index], ntd_f, ntd_f + 2);
+			}
 		#endif
-		// Counts the items that has been added.
-		NDP_P[playerid][ndp_dialogItemsCount]++;
-		// Logger for Debug purpose
-		#if defined _logger_included
+	#endif
+	// Counts the items that has been added.
+	NDP_P[playerid][ndp_dialogItemsCount]++;
+	// Logger for Debug purpose
+	#if defined _logger_included
+		#if defined __VECTOR_INCLUDED__
+		new ndp_data[DIALOG_MAX_LISTITEM_SIZE];
+		VECTOR_get_str(NDP_DialogInfo[playerid], index, ndp_data, DIALOG_MAX_LISTITEM_SIZE);
+		Logger_Log("ndialog-pages",
+			Logger_S("function", "AddDialogListitem"),
+			Logger_I("playerid", playerid),
+			Logger_I("index", index),
+			Logger_S("data", ndp_data));
+		#else
 		Logger_Log("ndialog-pages",
 			Logger_S("function", "AddDialogListitem"),
 			Logger_I("playerid", playerid),
 			Logger_I("index", index),
 			Logger_S("data", NDP_DialogInfo[playerid][index]));
 		#endif
-		return 1;
+	#endif
+	return 1;
+	#if !defined __VECTOR_INCLUDED__
 	}
 	return 0;
+	#endif
 }
 
 /* Opens a Dialog with pages. Items added with the "AddDialogListitem" function. Ensure that the "items_per_page" variable is above 0! */
@@ -205,7 +273,11 @@ static stock NDP_DialogInvoke(playerid, type, const function[], dialogid, style,
 		NDP_P[playerid][ndp_style] = style;
 		NDP_P[playerid][ndp_page] = 0;
 		NDP_P[playerid][ndp_amountPerPage] = items_per_page;
-		NDP_P[playerid][ndp_endIndex] = 0;
+		#if defined __VECTOR_INCLUDED__
+			VECTOR_clear(NDP_P[playerid][ndp_endIndex]);
+		#else
+			NDP_P[playerid][ndp_endIndex] = 0;
+		#endif
 		NDP_P[playerid][ndp_type] = type;
 		NDP_P[playerid][ndp_dialogName][0] = EOS;
 		
@@ -250,7 +322,13 @@ static stock NDP_CalculateListitemsPerPage(playerid)
 
 	for(new i = (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS ? 1 : 0); i < NDP_P[playerid][ndp_dialogItemsCount]; i++)
 	{
-		ndp_len += (strlen(NDP_DialogInfo[playerid][(i < (NDP_P[playerid][ndp_dialogItemsCount] - 1)) ? (i + 1) : (i)]) + 2);
+		#if defined __VECTOR_INCLUDED__
+			new ndp_data[DIALOG_MAX_LISTITEM_SIZE];
+			VECTOR_get_str(NDP_DialogInfo[playerid], (i < (NDP_P[playerid][ndp_dialogItemsCount] - 1)) ? (i + 1) : (i), ndp_data, DIALOG_MAX_LISTITEM_SIZE);
+			ndp_len += (strlen(ndp_data) + 2);
+		#else
+			ndp_len += (strlen(NDP_DialogInfo[playerid][(i < (NDP_P[playerid][ndp_dialogItemsCount] - 1)) ? (i + 1) : (i)]) + 2);
+		#endif
 		if((ndp_counter >= NDP_P[playerid][ndp_amountPerPage]) || ((ndp_len + npd_buttonslen) >= (DIALOG_MAX_INFO_SIZE - DIALOG_STRING_PUFFER_SIZE)))
 		{
 			#if defined _logger_included
@@ -267,22 +345,49 @@ static stock NDP_CalculateListitemsPerPage(playerid)
 			i--;
 		}
 		else ndp_counter++;
-		NDP_P[playerid][ndp_endIndex][ndp_pagelist] = (i + 1);
+		#if defined __VECTOR_INCLUDED__
+			if(VECTOR_size(NDP_P[playerid][ndp_endIndex]) <= ndp_pagelist)
+				VECTOR_resize(NDP_P[playerid][ndp_endIndex], ndp_pagelist+1);
+			VECTOR_set_val(NDP_P[playerid][ndp_endIndex], ndp_pagelist, (i + 1));
+		#else
+			NDP_P[playerid][ndp_endIndex][ndp_pagelist] = (i + 1);
+		#endif
 
 		#if defined _logger_included
-		Logger_Log("ndialog-pages",
-			Logger_S("function", "NDP_CalculateListitemsPerPage Loop"),
-			Logger_I("ndp_pagelist", NDP_P[playerid][ndp_endIndex][ndp_pagelist]),
-			Logger_I("iterator", i),
-			Logger_I("ndp_counter", ndp_counter));
+			#if defined __VECTOR_INCLUDED__
+			Logger_Log("ndialog-pages",
+				Logger_S("function", "NDP_CalculateListitemsPerPage Loop"),
+				Logger_I("ndp_pagelist", VECTOR_get_val(NDP_P[playerid][ndp_endIndex], ndp_pagelist)),
+				Logger_I("iterator", i),
+				Logger_I("ndp_counter", ndp_counter));
+			#else
+			Logger_Log("ndialog-pages",
+				Logger_S("function", "NDP_CalculateListitemsPerPage Loop"),
+				Logger_I("ndp_pagelist", NDP_P[playerid][ndp_endIndex][ndp_pagelist]),
+				Logger_I("iterator", i),
+				Logger_I("ndp_counter", ndp_counter));
+			#endif
 		#endif
 	}
-	NDP_P[playerid][ndp_endIndex][ndp_pagelist + (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS ? 1 : 0)] = NDP_P[playerid][ndp_dialogItemsCount];
+	#if defined __VECTOR_INCLUDED__
+		new index = ndp_pagelist + (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS ? 1 : 0);
+		if(VECTOR_size(NDP_P[playerid][ndp_endIndex]) <= index)
+			VECTOR_resize(NDP_P[playerid][ndp_endIndex], index+1);
+		VECTOR_set_val(NDP_P[playerid][ndp_endIndex], index, NDP_P[playerid][ndp_dialogItemsCount]);
+	#else
+		NDP_P[playerid][ndp_endIndex][ndp_pagelist + (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS ? 1 : 0)] = NDP_P[playerid][ndp_dialogItemsCount];
+	#endif
 
 	#if defined _logger_included
-	Logger_Log("ndialog-pages",
-		Logger_S("function", "NDP_CalculateListitemsPerPage After Loop"),
-		Logger_I("ndp_pagelist", NDP_P[playerid][ndp_endIndex][ndp_pagelist]));
+		#if defined __VECTOR_INCLUDED__
+		Logger_Log("ndialog-pages",
+			Logger_S("function", "NDP_CalculateListitemsPerPage After Loop"),
+			Logger_I("ndp_pagelist", VECTOR_get_val(NDP_P[playerid][ndp_endIndex], ndp_pagelist)));
+		#else
+		Logger_Log("ndialog-pages",
+			Logger_S("function", "NDP_CalculateListitemsPerPage After Loop"),
+			Logger_I("ndp_pagelist", NDP_P[playerid][ndp_endIndex][ndp_pagelist]));
+		#endif
 	#endif
 	return 1;
 }
@@ -291,8 +396,13 @@ static stock NDP_CalculateListitemsPerPage(playerid)
 static stock NDP_ShowDialogPage(playerid, ndppage)
 {
 	// Getting the Start and End Listitem Index of the current page
-	new startindex = (ndppage > 0) ? (NDP_P[playerid][ndp_endIndex][ndppage - 1]) : (0);
-	new endindex = NDP_P[playerid][ndp_endIndex][ndppage];
+	#if defined __VECTOR_INCLUDED__
+		new startindex = (ndppage > 0) ? (VECTOR_get_val(NDP_P[playerid][ndp_endIndex], ndppage - 1)) : (0);
+		new endindex = VECTOR_get_val(NDP_P[playerid][ndp_endIndex], ndppage);
+	#else
+		new startindex = (ndppage > 0) ? (NDP_P[playerid][ndp_endIndex][ndppage - 1]) : (0);
+		new endindex = NDP_P[playerid][ndp_endIndex][ndppage];
+	#endif
 
 	#if defined _logger_included
 	Logger_Log("ndialog-pages",
@@ -308,17 +418,32 @@ static stock NDP_ShowDialogPage(playerid, ndppage)
 	NDP_P[playerid][ndp_itemsonpage] = 0;
 	NDP_P[playerid][ndp_page] = ndppage;
 
+	#if defined __VECTOR_INCLUDED__
+		new ndp_data[DIALOG_MAX_LISTITEM_SIZE];
+	#endif
 	// Generate the Header if needed
 	if(NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS && NDP_P[playerid][ndp_itemsonpage] == 0)
 	{
-		strcat(NDP_DialogString, NDP_DialogInfo[playerid][0]);
+		#if defined __VECTOR_INCLUDED__
+			VECTOR_get_str(NDP_DialogInfo[playerid], 0, ndp_data);
+			strcat(NDP_DialogString, ndp_data);
+		#else
+			strcat(NDP_DialogString, NDP_DialogInfo[playerid][0]);
+		#endif
 		strcat(NDP_DialogString, "\n");
 
 		#if defined _logger_included
-		Logger_Log("ndialog-pages",
-			Logger_S("function", "NDP_ShowDialogPage"),
-			Logger_I("index", 0),
-			Logger_S("listitemadded", NDP_DialogInfo[playerid][0]));
+			#if defined __VECTOR_INCLUDED__
+			Logger_Log("ndialog-pages",
+				Logger_S("function", "NDP_ShowDialogPage"),
+				Logger_I("index", 0),
+				Logger_S("listitemadded", ndp_data));
+			#else
+			Logger_Log("ndialog-pages",
+				Logger_S("function", "NDP_ShowDialogPage"),
+				Logger_I("index", 0),
+				Logger_S("listitemadded", NDP_DialogInfo[playerid][0]));
+			#endif
 		#endif
 	}
 
@@ -326,14 +451,26 @@ static stock NDP_ShowDialogPage(playerid, ndppage)
 	for(new i = (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS && ndppage == 0 ? startindex + 1 : startindex) ; i < endindex; i++)
 	{
 		// Generate each listitem
-		strcat(NDP_DialogString, NDP_DialogInfo[playerid][i]);
+		#if defined __VECTOR_INCLUDED__
+			VECTOR_get_str(NDP_DialogInfo[playerid], i, ndp_data);
+			strcat(NDP_DialogString, ndp_data);
+		#else
+			strcat(NDP_DialogString, NDP_DialogInfo[playerid][i]);
+		#endif
 		strcat(NDP_DialogString, "\n");
 
 		#if defined _logger_included
-		Logger_Log("ndialog-pages",
-			Logger_S("function", "NDP_ShowDialogPage"),
-			Logger_I("index", i),
-			Logger_S("listitemadded", NDP_DialogInfo[playerid][i]));
+			#if defined __VECTOR_INCLUDED__
+			Logger_Log("ndialog-pages",
+				Logger_S("function", "NDP_ShowDialogPage"),
+				Logger_I("index", i),
+				Logger_S("listitemadded", ndp_data));
+			#else
+			Logger_Log("ndialog-pages",
+				Logger_S("function", "NDP_ShowDialogPage"),
+				Logger_I("index", i),
+				Logger_S("listitemadded", NDP_DialogInfo[playerid][i]));
+			#endif
 		#endif
 
 		// Keeping track on how much listitems are on the current page
@@ -446,7 +583,11 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 	if(dialogid == NDP_P[playerid][ndp_dialogid] && NDP_P[playerid][ndp_dialogOpened])
 	{
 		new cur_page = NDP_P[playerid][ndp_page];
-		new startindex = (cur_page > 0) ? (NDP_P[playerid][ndp_endIndex][cur_page - 1]) : (0);
+		#if defined __VECTOR_INCLUDED__
+			new startindex = (cur_page > 0) ? (VECTOR_get_val(NDP_P[playerid][ndp_endIndex], cur_page - 1)) : (0);
+		#else
+			new startindex = (cur_page > 0) ? (NDP_P[playerid][ndp_endIndex][cur_page - 1]) : (0);
+		#endif
 		new ndp_tmplistitem = startindex + listitem;
 		#if defined _logger_included
 		Logger_Log("ndialog-pages",
