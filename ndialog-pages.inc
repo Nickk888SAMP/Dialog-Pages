@@ -141,7 +141,7 @@ stock ClearDialogListitems(playerid)
 		VECTOR_clear(NDP_DialogInfo[playerid]);
 	#endif
 	//Logger for Debug purpose
-	#if defined _logger_included
+	#if defined NDP_USE_LOGGER
 	Logger_Log("ndialog-pages", 
 		Logger_S("function", "ClearDialogListitems"),
 		Logger_I("playerid", playerid));
@@ -165,7 +165,7 @@ stock ClearDialogListitems(playerid)
 	if(NDP_P[playerid][ndp_dialogItemsCount] < MAX_DIALOG_ITEMS)
 	{
 	#endif
-	#if !defined __VECTOR_INCLUDED__ || defined _logger_included || NDP_AUTO_REMOVE_NEW_LINE
+	#if !defined __VECTOR_INCLUDED__ || defined NDP_USE_LOGGER || NDP_AUTO_REMOVE_NEW_LINE
 		new index = NDP_P[playerid][ndp_dialogItemsCount];
 	#endif
 	#if defined _INC_y_va
@@ -210,7 +210,7 @@ stock ClearDialogListitems(playerid)
 	// Counts the items that has been added.
 	NDP_P[playerid][ndp_dialogItemsCount]++;
 	// Logger for Debug purpose
-	#if defined _logger_included
+	#if defined NDP_USE_LOGGER
 		#if defined __VECTOR_INCLUDED__
 		#if !defined ndp_data
 			new ndp_data[DIALOG_MAX_LISTITEM_SIZE];
@@ -249,7 +249,7 @@ stock ShowPlayerDialogPages(playerid, const function[], style, const caption[], 
 /* Prepares and Invokes/Opens the Dialog */
 static stock NDP_DialogInvoke(playerid, type, const function[], dialogid, style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[], const backbutton[])
 {
-	#if defined _logger_included
+	#if defined NDP_USE_LOGGER
 	Logger_Log("ndialog-pages",
 		Logger_S("function", "NDP_DialogInvoke Called."),
 		Logger_I("playerid", playerid),
@@ -314,7 +314,7 @@ static stock NDP_CalculateListitemsPerPage(playerid)
 	new ndp_len, ndp_pagelist, ndp_counter;
 	new npd_buttonslen = (strlen(NDP_P[playerid][ndp_nextButton]) + strlen(NDP_P[playerid][ndp_backButton]) + 4);
 
-	#if defined _logger_included
+	#if defined NDP_USE_LOGGER
 	Logger_Log("ndialog-pages",
 		Logger_S("function", "NDP_CalculateListitemsPerPage Loop"),
 		Logger_I("ndp_amountPerPage", NDP_P[playerid][ndp_amountPerPage]),
@@ -333,7 +333,7 @@ static stock NDP_CalculateListitemsPerPage(playerid)
 		#endif
 		if((ndp_counter >= NDP_P[playerid][ndp_amountPerPage]) || ((ndp_len + npd_buttonslen) >= (DIALOG_MAX_INFO_SIZE - DIALOG_STRING_PUFFER_SIZE)))
 		{
-			#if defined _logger_included
+			#if defined NDP_USE_LOGGER
 			Logger_Log("ndialog-pages",
 				Logger_S("function", "NDP_CalculateListitemsPerPage Loop Counter"),
 				Logger_I("ndp_pagelist", ndp_pagelist),
@@ -355,7 +355,7 @@ static stock NDP_CalculateListitemsPerPage(playerid)
 			NDP_P[playerid][ndp_endIndex][ndp_pagelist] = (i + 1);
 		#endif
 
-		#if defined _logger_included
+		#if defined NDP_USE_LOGGER
 			#if defined __VECTOR_INCLUDED__
 			Logger_Log("ndialog-pages",
 				Logger_S("function", "NDP_CalculateListitemsPerPage Loop"),
@@ -380,7 +380,7 @@ static stock NDP_CalculateListitemsPerPage(playerid)
 		NDP_P[playerid][ndp_endIndex][ndp_pagelist + (NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS ? 1 : 0)] = NDP_P[playerid][ndp_dialogItemsCount];
 	#endif
 
-	#if defined _logger_included
+	#if defined NDP_USE_LOGGER
 		#if defined __VECTOR_INCLUDED__
 		Logger_Log("ndialog-pages",
 			Logger_S("function", "NDP_CalculateListitemsPerPage After Loop"),
@@ -406,7 +406,7 @@ static stock NDP_ShowDialogPage(playerid, ndppage)
 		new endindex = NDP_P[playerid][ndp_endIndex][ndppage];
 	#endif
 
-	#if defined _logger_included
+	#if defined NDP_USE_LOGGER
 	Logger_Log("ndialog-pages",
 		Logger_S("function", "NDP_ShowDialogPage"),
 		Logger_I("playerid", playerid),
@@ -434,7 +434,7 @@ static stock NDP_ShowDialogPage(playerid, ndppage)
 		#endif
 		strcat(NDP_DialogString, "\n");
 
-		#if defined _logger_included
+		#if defined NDP_USE_LOGGER
 			#if defined __VECTOR_INCLUDED__
 			Logger_Log("ndialog-pages",
 				Logger_S("function", "NDP_ShowDialogPage"),
@@ -461,7 +461,7 @@ static stock NDP_ShowDialogPage(playerid, ndppage)
 		#endif
 		strcat(NDP_DialogString, "\n");
 
-		#if defined _logger_included
+		#if defined NDP_USE_LOGGER
 			#if defined __VECTOR_INCLUDED__
 			Logger_Log("ndialog-pages",
 				Logger_S("function", "NDP_ShowDialogPage"),
@@ -479,7 +479,7 @@ static stock NDP_ShowDialogPage(playerid, ndppage)
 		NDP_P[playerid][ndp_itemsonpage]++;
 	}
 
-	#if defined _logger_included
+	#if defined NDP_USE_LOGGER
 	Logger_Log("ndialog-pages",
 		Logger_S("function", "NDP_ShowDialogPage"),
 		Logger_I("itemsonpage", NDP_P[playerid][ndp_itemsonpage]));
@@ -491,7 +491,7 @@ static stock NDP_ShowDialogPage(playerid, ndppage)
 		strcat(NDP_DialogString, "\n");
 		strcat(NDP_DialogString, NDP_P[playerid][ndp_nextButton]);
 
-		#if defined _logger_included
+		#if defined NDP_USE_LOGGER
 		Logger_Log("ndialog-pages",
 			Logger_S("function", "NDP_ShowDialogPage"),
 			Logger_S("button created", "next"));
@@ -503,7 +503,7 @@ static stock NDP_ShowDialogPage(playerid, ndppage)
 		strcat(NDP_DialogString, "\n");
 		strcat(NDP_DialogString, NDP_P[playerid][ndp_backButton]);
 
-		#if defined _logger_included
+		#if defined NDP_USE_LOGGER
 		Logger_Log("ndialog-pages",
 			Logger_S("function", "NDP_ShowDialogPage"),
 			Logger_S("button created", "back"));
@@ -512,7 +512,7 @@ static stock NDP_ShowDialogPage(playerid, ndppage)
 	// Show Dialog
 	if(NDP_P[playerid][ndp_itemsonpage] > 0 || NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS)
 	{
-		#if defined _logger_included
+		#if defined NDP_USE_LOGGER
 		Logger_Log("ndialog-pages",
 			Logger_S("function", "NDP_ShowDialogPage"),
 			Logger_I("showingdialogforplayer", playerid));
@@ -548,7 +548,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 			strcat(ndp_d_str, ndp_d_dnu);
 
 			// Logger for debugging
-			#if defined _logger_included
+			#if defined NDP_USE_LOGGER
 			Logger_Log("ndialog-pages",
 				Logger_S("callback", "OnDialogResponse - type: NDP_DIALOG_TYPE_DIALOG"),
 				Logger_I("funcidx(ndp_d_str)", funcidx(ndp_d_str)),
@@ -561,7 +561,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 			{
 				// Call the function
 				CallLocalFunction(ndp_d_str, "ddds", playerid, response, listitem, inputtext);
-				#if defined _logger_included
+				#if defined NDP_USE_LOGGER
 				Logger_Log("ndialog-pages",
 					Logger_S("callback", "OnDialogResponse - CallLocalFunction"));
 				#endif
@@ -591,7 +591,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 			new startindex = (cur_page > 0) ? (NDP_P[playerid][ndp_endIndex][cur_page - 1]) : (0);
 		#endif
 		new ndp_tmplistitem = startindex + listitem;
-		#if defined _logger_included
+		#if defined NDP_USE_LOGGER
 		Logger_Log("ndialog-pages",
 			Logger_S("callback", "OnDialogResponse"),
 			Logger_I("ndp_dialogItemsCount", NDP_P[playerid][ndp_dialogItemsCount]),
@@ -606,7 +606,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 				//Button "Next"
 				if(listitem == (NDP_P[playerid][ndp_itemsonpage])) 
 				{
-					#if defined _logger_included
+					#if defined NDP_USE_LOGGER
 					Logger_Log("ndialog-pages",
 						Logger_S("callback", "OnDialogResponse"),
 						Logger_S("button clicked", "next"));
@@ -618,7 +618,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 				//Button "Back"
 				else if(listitem == (NDP_P[playerid][ndp_itemsonpage] + 1)) 
 				{
-					#if defined _logger_included
+					#if defined NDP_USE_LOGGER
 					Logger_Log("ndialog-pages",
 						Logger_S("callback", "OnDialogResponse"),
 						Logger_S("button clicked", "back"));
@@ -631,7 +631,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 				else 
 				{
 					listitem = ndp_tmplistitem - ((NDP_P[playerid][ndp_style] == DIALOG_STYLE_TABLIST_HEADERS && cur_page > 0) ? (1) : (0)); 
-					#if defined _logger_included
+					#if defined NDP_USE_LOGGER
 					Logger_Log("ndialog-pages",
 						Logger_S("callback", "OnDialogResponse"),
 						Logger_S("button clicked", "item"),
@@ -644,7 +644,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 			else if(NDP_P[playerid][ndp_dialogItemsCount] > 0)
 			{
 				//Also button "Back", but on the last page
-				#if defined _logger_included
+				#if defined NDP_USE_LOGGER
 				Logger_Log("ndialog-pages",
 					Logger_S("callback", "OnDialogResponse"),
 					Logger_S("button clicked", "back - last page"));
