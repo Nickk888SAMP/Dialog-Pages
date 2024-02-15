@@ -165,7 +165,9 @@ stock ClearDialogListitems(playerid)
 	if(NDP_P[playerid][ndp_dialogItemsCount] < MAX_DIALOG_ITEMS)
 	{
 	#endif
-	new index = NDP_P[playerid][ndp_dialogItemsCount];
+	#if !defined __VECTOR_INCLUDED__ || defined _logger_included || NDP_AUTO_REMOVE_NEW_LINE
+		new index = NDP_P[playerid][ndp_dialogItemsCount];
+	#endif
 	#if defined _INC_y_va
 		new distr[145];
 		va_format(distr, sizeof (distr), itemstr, va_start<2>);
@@ -210,8 +212,10 @@ stock ClearDialogListitems(playerid)
 	// Logger for Debug purpose
 	#if defined _logger_included
 		#if defined __VECTOR_INCLUDED__
-		new ndp_data[DIALOG_MAX_LISTITEM_SIZE];
-		VECTOR_get_str(NDP_DialogInfo[playerid], index, ndp_data, DIALOG_MAX_LISTITEM_SIZE);
+		#if !defined ndp_data
+			new ndp_data[DIALOG_MAX_LISTITEM_SIZE];
+			VECTOR_get_str(NDP_DialogInfo[playerid], index, ndp_data, DIALOG_MAX_LISTITEM_SIZE);
+		#endif
 		Logger_Log("ndialog-pages",
 			Logger_S("function", "AddDialogListitem"),
 			Logger_I("playerid", playerid),
