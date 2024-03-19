@@ -21,6 +21,7 @@ ShowPlayerDialogPages(playerid, const function[], style, const caption[], const 
 
 #tryinclude 								<YSI_Coding\y_hooks> //By Y_Less | Thank you, great include <3
 #tryinclude 								<YSI_Coding\y_va> //By Y_Less | Thank you, great include <3
+#tryinclude									<YSI_Coding\y_inline> //By Y_Less | Support added by Tiaansu
 #tryinclude 								<vector> //By BigETI | Support added by wiger3
 #if defined NDP_USE_LOGGER	
 	#include 								<logger> //Uncomment to include logger, useful for debugging.
@@ -61,6 +62,12 @@ forward OnDialogPagesPerformed(playerid, const dialog[], response, bool:success,
 #define DIALOG_STRING_PUFFER_SIZE		132 						// The margin for the dialog len size so it won't cut off the string and bug everything.
 #define INVALID_LISTITEM 				(0xFFFF) 				// The definition for an Invalid Listitem, don't go above -1
 //#define NDP_AUTO						(MAX_DIALOG_ITEMS) 			// Defines the size of the automatic detection definition of list items amount per page.
+
+#if YSI_VERSION_MAJOR == 5 && defined _INC_y_inline
+	static stock
+		NDP_DialogName[64] = "Inline_DialogPages",
+		Func:NDP_InlineCB<iis>;
+#endif
 
 /************************************************************
                         ENUMERATORS
@@ -241,6 +248,19 @@ stock ShowPlayerDialogPages(playerid, const function[], style, const caption[], 
 {
 	return NDP_DialogInvoke(playerid, NDP_DIALOG_TYPE_DIALOG, function, 32701, style, caption, button1, button2, items_per_page, nextbutton, backbutton);
 }
+
+/* Same as ShowPlayerDialogPages but with inline support. */
+#if YSI_VERSION_MAJOR == 5 && defined _INC_y_inline
+	stock ShowInlineDialogPages(playerid, Func:cb<iis>, style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<")
+	{
+		if (ShowPlayerDialogPages(playerid, NDP_DialogName, style, caption, button1, button2, items_per_page, nextbutton, backbutton))
+		{
+			Indirect_Claim(cb);
+			NDP_InlineCB = cb;
+		}
+		return 1;
+	}
+#endif
 
 /************************************************************
                 	INTERNAL FUNCTIONS
@@ -662,6 +682,20 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 	}
 	return 0;
 }
+
+#if YSI_VERSION_MAJOR == 5 && defined _INC_y_inline
+	DialogPages:Inline_DialogPages(playerid, response, listitem, string:inputtext[])
+	{
+		new Func:cb<iis> = NDP_InlineCB;
+		NDP_InlineCB = Func:0<iis>;
+
+		@.cb(response, listitem, inputtext);
+
+		Indirect_Release(cb);
+
+		return 1;
+	}
+#endif
 
 /************************************************************
                 	_ALS_ HOOKING
