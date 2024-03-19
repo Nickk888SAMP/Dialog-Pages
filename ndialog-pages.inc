@@ -250,7 +250,7 @@ stock ShowPlayerDialogPages(playerid, const function[], style, const caption[], 
 }
 
 /* Same as ShowPlayerDialogPages but with inline support. */
-#if defined _INC_y_inline
+#if YSI_VERSION_MAJOR == 5 && defined _INC_y_inline
 	stock ShowInlineDialogPages(playerid, Func:cb<iis>, style, const caption[], const button1[], const button2[], items_per_page, const nextbutton[] = "{FF0000}>>>", const backbutton[] = "{FF0000}<<<")
 	{
 		if (ShowPlayerDialogPages(playerid, NDP_DialogName, style, caption, button1, button2, items_per_page, nextbutton, backbutton))
