@@ -684,7 +684,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 }
 
 #if YSI_VERSION_MAJOR == 5 && defined _INC_y_inline
-	Dialogpages:Inline_DialogPages(playerid, response, listitem, string:inputtext[])
+	DialogPages:Inline_DialogPages(playerid, response, listitem, string:inputtext[])
 	{
 		new Func:cb<iis> = NDP_InlineCB;
 		NDP_InlineCB = Func:0<iis>;
