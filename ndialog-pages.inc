@@ -689,7 +689,7 @@ static stock NDP_ProcessDialogResponse(playerid, dialogid, response, listitem, i
 		new Func:cb<iis> = NDP_InlineCB;
 		NDP_InlineCB = Func:0<iis>;
 
-		@.cb(resonse, listitem, inputtext);
+		@.cb(response, listitem, inputtext);
 
 		Indirect_Release(cb);
 
